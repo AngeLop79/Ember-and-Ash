@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CartItem, MenuItem } from "@/types";
+import { MENU_ITEMS } from "@/lib/data";
 
 interface CartStore {
   items: CartItem[];
@@ -20,8 +21,27 @@ interface CartStore {
   setHasHydrated: (value: boolean) => void;
 }
 
+type PersistedCartState = Pick<CartStore, "items" | "isOpen" | "hasHydrated">;
+
+type PersistedCartEntry = {
+  id: string;
+  quantity: number;
+  notes?: string;
+};
+
+function isPersistedCartEntry(value: unknown): value is PersistedCartEntry {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value &&
+    typeof value.id === "string" &&
+    "quantity" in value &&
+    typeof value.quantity === "number"
+  );
+}
+
 export const useCartStore = create<CartStore>()(
-  persist(
+  persist<CartStore, [], [], PersistedCartState>(
     (set, get) => ({
       items: [],
       isOpen: false,
@@ -80,6 +100,35 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: "ember-cart",
+      version: 1,
+      migrate: (persistedState) => {
+        const previousState =
+          persistedState && typeof persistedState === "object"
+            ? (persistedState as Partial<PersistedCartState>)
+            : {};
+        const items = Array.isArray(previousState.items)
+          ? previousState.items.flatMap((item) => {
+              if (!isPersistedCartEntry(item)) return [];
+
+              const currentMenuItem = MENU_ITEMS.find(
+                ({ id }) => id === item.id,
+              );
+              return currentMenuItem ? [{ ...item, ...currentMenuItem }] : [];
+            })
+          : [];
+
+        return {
+          items,
+          isOpen:
+            typeof previousState.isOpen === "boolean" ? previousState.isOpen : false,
+          hasHydrated: false,
+        };
+      },
+      partialize: (state) => ({
+        items: state.items,
+        isOpen: state.isOpen,
+        hasHydrated: state.hasHydrated,
+      }),
       skipHydration: true,
       onRehydrateStorage: () => (state, error) => {
         if (!error) state?.setHasHydrated(true);

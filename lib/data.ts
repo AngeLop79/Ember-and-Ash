@@ -16,8 +16,8 @@ export const RESTAURANT_INFO = {
     weekend: 23,
   },
   deliveryRadius: "10km",
-  deliveryFee: 500,
-  freeDeliveryAbove: 8000,
+  deliveryFee: 33,
+  freeDeliveryAbove: 534,
 };
 
 export const CATEGORIES = [
@@ -37,7 +37,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Lumache piccanti",
     description:
       "Lumache africane di grandi dimensioni, cotte lentamente nella nostra salsa piccante della casa con spezie aromatiche",
-    price: 4500,
+    price: 301,
     category: "starters",
     image:
       "https://i.pinimg.com/originals/c3/90/c5/c390c5396fa33d092e0030186be38e69.jpg",
@@ -52,7 +52,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Spiedini di suya",
     description:
       "Teneri spiedini di manzo marinati in una pasta speziata di arachidi e grigliati a fiamma viva",
-    price: 3800,
+    price: 254,
     category: "grills",
     image:
       "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",
@@ -67,7 +67,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Ofe Onugbu",
     description:
       "Zuppa tradizionale di foglie amare con carni miste, stoccafisso e olio di palma",
-    price: 5200,
+    price: 347,
     category: "soups",
     image:
       "https://tse4.mm.bing.net/th/id/OIP.mYKOCyaqEwrh6PvMD6DnUgHaE4?rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -82,7 +82,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Riso jollof alla brace",
     description:
       "Riso al pomodoro dal gusto affumicato e dai bordi tostati, servito con pollo alla griglia e platano fritto",
-    price: 4800,
+    price: 321,
     category: "mains",
     image:
       "https://tse1.mm.bing.net/th/id/OIP.8u0ljZC2sFTUW2r7s6H-wwHaJQ?w=2448&h=3059&rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -97,7 +97,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Bistecca T-bone",
     description:
       "T-bone di prima scelta da 1 kg, cotta alla brace secondo il tuo gusto e servita con burro alle erbe e verdure arrosto",
-    price: 18500,
+    price: 1236,
     category: "grills",
     image:
       "https://tse1.explicit.bing.net/th/id/OIP.C4TwLl0rM1phue0Vrlz3KwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -112,7 +112,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Zuppa di egusi",
     description:
       "Semi di melone macinati, cotti con spinaci, carni miste, gamberetti e olio di palma",
-    price: 4900,
+    price: 327,
     category: "soups",
     image:
       "https://i.pinimg.com/originals/57/fb/c3/57fbc3f4f9d1c5cb17955498947730ea.jpg",
@@ -127,7 +127,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Igname pestato",
     description:
       "Purè di igname morbido ed elastico, l’accompagnamento perfetto per ogni zuppa",
-    price: 1200,
+    price: 80,
     category: "sides",
     image:
       "https://th.bing.com/th/id/R.a3ba2285d39575b527a6e3357b757df6?rik=Cz27xh3XLe8xOg&pid=ImgRaw&r=0",
@@ -142,7 +142,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Platano fritto",
     description:
       "Platano maturo fritto fino a diventare dorato e caramellato: una specialità di Lagos",
-    price: 900,
+    price: 60,
     category: "sides",
     image:
       "https://tse4.mm.bing.net/th/id/OIP.Srv0mCjs-55QBbuYgkZofAHaE7?rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -157,7 +157,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Zobo Royale",
     description:
       "Bevanda pregiata all’ibisco con zenzero, chiodi di garofano e agrumi, servita fredda",
-    price: 1500,
+    price: 100,
     category: "drinks",
     image:
       "https://th.bing.com/th/id/OIP.nFetB8AII_HWO3LiSCXK1AHaHf?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -172,7 +172,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Chapman",
     description:
       "Cocktail nigeriano classico con Fanta, Sprite, Ribena, cetriolo e bitter Angostura",
-    price: 1800,
+    price: 120,
     category: "drinks",
     image:
       "https://www.africanrecipes.com.ng/wp-content/uploads/2025/08/chapman-drink-featured.png",
@@ -187,7 +187,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Zuppa piccante di pesce gatto",
     description:
       "Pesce gatto fresco in un intenso brodo piccante con foglie di uziza",
-    price: 6500,
+    price: 434,
     category: "soups",
     image:
       "https://th.bing.com/th/id/R.a89e498830c7275925c1e4b37ed6cdc2?rik=PdeJ0ONjDqaw2Q&riu=http%3a%2f%2fwww.allnigerianrecipes.com%2fimages%2fcatfish-pepper-soup.jpg&ehk=UWwHEjVUsYBYSzB6jqVm1DOWXm0W3H7RD1I38fU2dlA%3d&risl=&pid=ImgRaw&r=0",
@@ -202,7 +202,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Tortino dal cuore morbido",
     description:
       "Tortino caldo al cioccolato dal cuore morbido, servito con gelato alla vaniglia",
-    price: 2800,
+    price: 187,
     category: "desserts",
     image:
       "https://insanelygoodrecipes.com/wp-content/uploads/2024/12/Lava-Cake-2-683x1024.jpg",
@@ -217,7 +217,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Costolette d'agnello",
     description:
       "Costolette d’agnello tagliate alla francese, marinate alla menta e pepe e grigliate su brace di legna",
-    price: 12000,
+    price: 802,
     category: "grills",
     image:
       "https://tse4.mm.bing.net/th/id/OIP.j27h9uzQHuHa1YOl4Fzw9wHaLH?rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -232,7 +232,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Asun",
     description:
       "Carne di capra affumicata in una salsa intensa di peperoncino e cipolla, immancabile durante l’Owambe",
-    price: 5500,
+    price: 367,
     category: "starters",
     image:
       "https://tse3.mm.bing.net/th/id/OIP.JQPvTYmXqo_H-s_BUW6MEwHaKL?rs=1&pid=ImgDetMain&o=7&rm=3",
@@ -247,7 +247,7 @@ export const MENU_ITEMS: MenuItem[] = [
     name: "Nkwobi",
     description:
       "Zampetto di manzo speziato in una ricca crema di ugba e semi di palma, cotto lentamente a puntino",
-    price: 5800,
+    price: 387,
     category: "starters",
     image:
       "https://tse2.mm.bing.net/th/id/OIP.Zazj-ilNUw0KqJNxc3rWYAHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3",

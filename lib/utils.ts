@@ -2,14 +2,16 @@ import { CartItem } from "@/types";
 import { RESTAURANT_INFO } from "./data";
 
 export function formatPrice(amount: number): string {
-  // Use a deterministic formatter to avoid server/client Intl differences during hydration
-  const parts = Math.round(amount).toString().split("");
-  let res = "";
-  for (let i = parts.length - 1, j = 0; i >= 0; i--, j++) {
-    res = parts[i] + res;
-    if (j % 3 === 2 && i !== 0) res = "," + res;
-  }
-  return `₦${res}`;
+  // Keep server and browser formatting identical during hydration.
+  const cents = Math.round(amount);
+  const absoluteCents = Math.abs(cents);
+  const euros = Math.floor(absoluteCents / 100)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const centPart = (absoluteCents % 100).toString().padStart(2, "0");
+  const sign = cents < 0 ? "-" : "";
+
+  return `${sign}${euros},${centPart}\u00a0€`;
 }
 
 export function generateOrderId(): string {

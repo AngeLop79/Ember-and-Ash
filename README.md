@@ -13,6 +13,10 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 - Accedi con il sistema dimostrativo locale per aprire il pannello di amministrazione.
 - Gestisci gli ordini salvati, le prenotazioni e le voci del menu dall'area admin.
 
+## Valuta e prezzi
+
+I prezzi sono espressi in euro e memorizzati come centesimi interi, sia nel menu sia nel database. Gli importi di esempio in naira sono stati convertiti con un tasso indicativo di 1 EUR = 1.496,85 NGN; il tasso è statico e non viene aggiornato automaticamente. Per convertire un database preesistente, applicare una volta `database/migrations/20261020_ngn_to_eur_cents.sql`: la migrazione registra la propria esecuzione e non converte di nuovo gli importi se viene rilanciata.
+
 ## PostgreSQL locale con Rancher Desktop
 
 L'applicazione si collega a PostgreSQL dal server Next.js; il browser non accede mai direttamente al database.
