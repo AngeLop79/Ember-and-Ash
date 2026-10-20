@@ -19,12 +19,12 @@ export async function PATCH(
 ) {
   if (!process.env.ADMIN_API_KEY) {
     return Response.json(
-      { error: "ADMIN_API_KEY is not configured on the server." },
+      { error: "La variabile ADMIN_API_KEY non è configurata sul server." },
       { status: 503 },
     );
   }
   if (!isAdminApiRequest(request)) {
-    return Response.json({ error: "Unauthorized." }, { status: 401 });
+    return Response.json({ error: "Accesso non autorizzato." }, { status: 401 });
   }
 
   let body: unknown;
@@ -32,7 +32,7 @@ export async function PATCH(
     body = await request.json();
   } catch {
     return Response.json(
-      { error: "Invalid JSON request body." },
+      { error: "Il formato della richiesta JSON non è valido." },
       { status: 400 },
     );
   }
@@ -43,7 +43,7 @@ export async function PATCH(
     typeof body.status !== "string" ||
     !ORDER_STATUSES.includes(body.status as (typeof ORDER_STATUSES)[number])
   ) {
-    return Response.json({ error: "Invalid order status." }, { status: 400 });
+    return Response.json({ error: "Lo stato dell’ordine non è valido." }, { status: 400 });
   }
 
   const { id } = await params;
@@ -56,12 +56,12 @@ export async function PATCH(
   } catch (error) {
     console.error("Failed to update order status in PostgreSQL.", error);
     return Response.json(
-      { error: "Could not update order status." },
+      { error: "Impossibile aggiornare lo stato dell’ordine." },
       { status: 500 },
     );
   }
   if (result.rowCount === 0) {
-    return Response.json({ error: "Order not found." }, { status: 404 });
+    return Response.json({ error: "Ordine non trovato." }, { status: 404 });
   }
 
   return Response.json({ id: id.toUpperCase(), status: result.rows[0].status });

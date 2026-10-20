@@ -34,7 +34,7 @@ export async function GET(
   } catch (error) {
     console.error("Failed to look up order in PostgreSQL.", error);
     return Response.json(
-      { error: "Order lookup is temporarily unavailable." },
+      { error: "La ricerca dell’ordine non è temporaneamente disponibile." },
       { status: 500 },
     );
   }
@@ -43,7 +43,7 @@ export async function GET(
     | { id: string; order_type: string; status: string; items: string }
     | undefined;
   if (!order) {
-    return Response.json({ error: "Order not found." }, { status: 404 });
+    return Response.json({ error: "Ordine non trovato." }, { status: 404 });
   }
 
   return Response.json({

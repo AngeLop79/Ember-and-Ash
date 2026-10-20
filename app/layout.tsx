@@ -6,9 +6,9 @@ import Cart from "@/components/order/Cart";
 import PageTransition from "@/components/layout/PageTransition";
 
 export const metadata: Metadata = {
-  title: "Ember & Ash — Fire-crafted Flavours",
+  title: "Ember & Ash — Sapori alla brace",
   description:
-    "Experience the art of fire-crafted Nigerian cuisine. Order online, book a table, or get it delivered.",
+    "Scopri i sapori della cucina nigeriana alla brace. Ordina online, prenota un tavolo o ricevi il tuo ordine a domicilio.",
   icons: {
     icon: "/favicon.svg",
   },
@@ -24,7 +24,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="it">
       <body className="grain">
         <Navbar />
         <Cart />

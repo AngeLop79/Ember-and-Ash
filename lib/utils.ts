@@ -37,17 +37,17 @@ export function buildWhatsAppOrderMessage(
 
   const orderType =
     type === "delivery"
-      ? `🛵 *Delivery*${address ? `\nAddress: ${address}` : ""}`
+      ? `🛵 *Consegna a domicilio*${address ? `\nIndirizzo: ${address}` : ""}`
       : type === "pickup"
-        ? "🏃 *Pickup*"
-        : "🍽️ *Dine-In*";
+        ? "🏃 *Ritiro in sede*"
+        : "🍽️ *Consumo al ristorante*";
 
   return encodeURIComponent(
-    `Hello Ember & Ash! 🔥\n\nI'd like to place an order:\n\n${itemLines}\n\n💰 *Total: ${formatPrice(
+    `Salve I ragazzi del sole! 🔥\n\nVorrei effettuare un ordine:\n\n${itemLines}\n\n💰 *Totale: ${formatPrice(
       total,
     )}*\n\n${orderType}${
-      customerName ? `\n\n👤 Name: ${customerName}` : ""
-    }\n\nPlease confirm my order. Thank you!`,
+      customerName ? `\n\n👤 Nome: ${customerName}` : ""
+    }\n\nConfermate il mio ordine, grazie!`,
   );
 }
 
@@ -59,9 +59,9 @@ export function buildWhatsAppReservationMessage(
   requests?: string,
 ): string {
   return encodeURIComponent(
-    `Hello Ember & Ash! 🔥\n\nI'd like to make a reservation:\n\n👤 Name: ${name}\n📅 Date: ${date}\n⏰ Time: ${time}\n👥 Guests: ${guests}${
-      requests ? `\n📝 Special Requests: ${requests}` : ""
-    }\n\nPlease confirm my reservation. Thank you!`,
+    `Salve I ragazzi del sole! 🔥\n\nVorrei prenotare un tavolo:\n\n👤 Nome: ${name}\n📅 Data: ${date}\n⏰ Ora: ${time}\n👥 Ospiti: ${guests}${
+      requests ? `\n📝 Richieste speciali: ${requests}` : ""
+    }\n\nConfermate la mia prenotazione, grazie!`,
   );
 }
 
@@ -75,6 +75,6 @@ export function calculateDeliveryFee(subtotal: number): number {
 }
 
 export function getSpiceLevelLabel(level: number): string {
-  const labels = ["Mild", "Medium", "Hot", "Fire 🔥"];
-  return labels[level] || "Mild";
+  const labels = ["Delicato", "Medio", "Piccante", "Molto piccante 🔥"];
+  return labels[level] || "Delicato";
 }

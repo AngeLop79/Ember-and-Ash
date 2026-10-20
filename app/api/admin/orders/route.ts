@@ -6,12 +6,12 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   if (!process.env.ADMIN_API_KEY) {
     return Response.json(
-      { error: "ADMIN_API_KEY is not configured on the server." },
+      { error: "La variabile ADMIN_API_KEY non è configurata sul server." },
       { status: 503 },
     );
   }
   if (!isAdminApiRequest(request)) {
-    return Response.json({ error: "Unauthorized." }, { status: 401 });
+    return Response.json({ error: "Accesso non autorizzato." }, { status: 401 });
   }
 
   try {
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Failed to load admin orders from PostgreSQL.", error);
     return Response.json(
-      { error: "Could not load orders from the database." },
+      { error: "Impossibile caricare gli ordini dal database." },
       { status: 500 },
     );
   }

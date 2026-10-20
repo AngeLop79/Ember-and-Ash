@@ -55,11 +55,11 @@ export default function ReservationsPage() {
   };
 
   const validate = () => {
-    if (!form.name) return "Please enter your name";
-    if (!form.phone) return "Please enter your phone number";
-    if (!form.date) return "Please select a date";
-    if (!form.time) return "Please select a time";
-    if (!form.guests) return "Please select number of guests";
+    if (!form.name) return "Inserisci il tuo nome";
+    if (!form.phone) return "Inserisci il tuo numero di telefono";
+    if (!form.date) return "Seleziona una data";
+    if (!form.time) return "Seleziona un orario";
+    if (!form.guests) return "Seleziona il numero di ospiti";
     return null;
   };
 
@@ -72,7 +72,7 @@ export default function ReservationsPage() {
     const id = generateOrderId().replace("EA-", "RES-");
     setConfirmId(id);
     setStatus("success");
-    toast.success("Reservation confirmed!");
+    toast.success("Prenotazione confermata!");
   };
 
   const guardWhatsAppAccess = () => {
@@ -80,8 +80,8 @@ export default function ReservationsPage() {
     const hasAccount = hasAccounts();
     toast.error(
       hasAccount
-        ? "Please log in with your email and password first"
-        : "Please sign up first before using WhatsApp",
+        ? "Accedi prima con la tua email e la tua password"
+        : "Crea un account prima di usare WhatsApp",
     );
     router.push("/auth?next=/reservations");
     return false;
@@ -139,7 +139,7 @@ export default function ReservationsPage() {
             <CheckCircle size={40} color="#D4A843" />
           </div>
           <p className="section-label" style={{ marginBottom: "12px" }}>
-            Booking confirmed
+            Prenotazione confermata
           </p>
           <h2
             className="font-display"
@@ -150,7 +150,7 @@ export default function ReservationsPage() {
               marginBottom: "8px",
             }}
           >
-            See You Soon!
+            A presto!
           </h2>
           <p
             style={{
@@ -182,10 +182,10 @@ export default function ReservationsPage() {
               }}
             >
               {[
-                { label: "Name", value: form.name, icon: "👤" },
-                { label: "Guests", value: `${form.guests} people`, icon: "👥" },
-                { label: "Date", value: form.date, icon: "📅" },
-                { label: "Time", value: form.time, icon: "⏰" },
+                { label: "Nome", value: form.name, icon: "👤" },
+                { label: "Ospiti", value: `${form.guests} persone`, icon: "👥" },
+                { label: "Data", value: form.date, icon: "📅" },
+                { label: "Ora", value: form.time, icon: "⏰" },
               ].map((d) => (
                 <div key={d.label}>
                   <p
@@ -222,7 +222,7 @@ export default function ReservationsPage() {
                     marginBottom: "4px",
                   }}
                 >
-                  Special Requests
+                  Richieste speciali
                 </p>
                 <p style={{ color: "#F5EDD8", fontSize: "14px" }}>
                   {form.requests}
@@ -238,8 +238,8 @@ export default function ReservationsPage() {
               lineHeight: "1.6",
             }}
           >
-            We&apos;ll send a confirmation to {form.phone}. If you need to
-            modify or cancel, call us at{" "}
+            Invieremo una conferma al numero {form.phone}. Per modificare o
+            annullare la prenotazione, chiamaci al{" "}
             <a
               href={`tel:${RESTAURANT_INFO.phone}`}
               style={{ color: "#E8541A", textDecoration: "none" }}
@@ -276,7 +276,7 @@ export default function ReservationsPage() {
                 fontSize: "14px",
               }}
             >
-              New Reservation
+              Nuova prenotazione
             </button>
             <button
               onClick={() => {
@@ -300,7 +300,7 @@ export default function ReservationsPage() {
                 gap: "8px",
               }}
             >
-              <MessageCircle size={16} /> Message Us
+              <MessageCircle size={16} /> Scrivici
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function ReservationsPage() {
           }}
         >
           <p className="section-label" style={{ marginBottom: "14px" }}>
-            Reserve your place
+            Prenota il tuo posto
           </p>
           <h1
             className="font-display"
@@ -355,11 +355,11 @@ export default function ReservationsPage() {
               marginBottom: "12px",
             }}
           >
-            Book a Table
+            Prenota un tavolo
           </h1>
           <p style={{ color: "#8A7566", fontSize: "16px", maxWidth: "480px" }}>
-            A memorable dining experience awaits. Reserve your table and let us
-            take care of the rest.
+            Ti aspetta un’esperienza da ricordare. Prenota il tuo tavolo e al
+            resto pensiamo noi.
           </p>
         </div>
       </div>
@@ -396,7 +396,7 @@ export default function ReservationsPage() {
                 marginBottom: "28px",
               }}
             >
-              Reservation Details
+              Dettagli della prenotazione
             </h2>
 
             <div
@@ -422,7 +422,7 @@ export default function ReservationsPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Full Name *
+                    Nome e cognome *
                   </label>
                   <div style={{ position: "relative" }}>
                     <input
@@ -430,7 +430,7 @@ export default function ReservationsPage() {
                       name="name"
                       value={form.name}
                       onChange={handleInput}
-                      placeholder="Amaka Okonkwo"
+                      placeholder="Mario Rossi"
                     />
                   </div>
                 </div>
@@ -445,14 +445,14 @@ export default function ReservationsPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Phone Number *
+                    Numero di telefono *
                   </label>
                   <input
                     className="input-field"
                     name="phone"
                     value={form.phone}
                     onChange={handleInput}
-                    placeholder="+234 801 234 5678"
+                    placeholder="+39 320 123 4567"
                     type="tel"
                   />
                 </div>
@@ -470,14 +470,14 @@ export default function ReservationsPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Email Address (optional)
+                  Indirizzo email (facoltativo)
                 </label>
                 <input
                   className="input-field"
                   name="email"
                   value={form.email}
                   onChange={handleInput}
-                  placeholder="amaka@example.com"
+                  placeholder="mario@example.it"
                   type="email"
                 />
               </div>
@@ -502,7 +502,7 @@ export default function ReservationsPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Date *
+                    Data *
                   </label>
                   <input
                     className="input-field"
@@ -525,7 +525,7 @@ export default function ReservationsPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Time *
+                    Orario *
                   </label>
                   <select
                     className="input-field"
@@ -533,7 +533,7 @@ export default function ReservationsPage() {
                     value={form.time}
                     onChange={handleInput}
                   >
-                    <option value="">Select time</option>
+                    <option value="">Seleziona un orario</option>
                     {TIMES.map((t) => (
                       <option key={t} value={t}>
                         {t}
@@ -552,7 +552,7 @@ export default function ReservationsPage() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Guests *
+                    Ospiti *
                   </label>
                   <select
                     className="input-field"
@@ -562,10 +562,10 @@ export default function ReservationsPage() {
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
                       <option key={n} value={n}>
-                        {n} {n === 1 ? "guest" : "guests"}
+                        {n} {n === 1 ? "ospite" : "ospiti"}
                       </option>
                     ))}
-                    <option value="13+">13+ (contact us)</option>
+                    <option value="13+">13+ (contattaci)</option>
                   </select>
                 </div>
               </div>
@@ -582,14 +582,14 @@ export default function ReservationsPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Special Requests
+                  Richieste speciali
                 </label>
                 <textarea
                   className="input-field"
                   name="requests"
                   value={form.requests}
                   onChange={handleInput}
-                  placeholder="Birthday celebration, dietary restrictions, seating preference, high chair needed..."
+                  placeholder="Festa di compleanno, esigenze alimentari, preferenze sul posto..."
                   style={{ minHeight: "100px", resize: "vertical" }}
                 />
               </div>
@@ -617,7 +617,7 @@ export default function ReservationsPage() {
                   gap: "8px",
                 }}
               >
-                <Calendar size={18} /> Confirm Reservation
+                <Calendar size={18} /> Conferma prenotazione
               </button>
               <button
                 onClick={handleWhatsApp}
@@ -636,14 +636,14 @@ export default function ReservationsPage() {
                   transition: "opacity 0.2s",
                 }}
               >
-                <MessageCircle size={16} /> Book via WhatsApp
+                <MessageCircle size={16} /> Prenota su WhatsApp
               </button>
             </div>
             <p
               style={{ fontSize: "12px", color: "#8A7566", marginTop: "16px" }}
             >
-              By booking, you agree to our cancellation policy. Please cancel at
-              least 2 hours before your reservation.
+              Prenotando, accetti la nostra politica di cancellazione. Se
+              necessario, annulla almeno 2 ore prima dell’orario scelto.
             </p>
           </div>
         </div>
@@ -668,7 +668,7 @@ export default function ReservationsPage() {
                 marginBottom: "20px",
               }}
             >
-              Good to Know
+              Informazioni utili
             </h3>
             <div
               style={{ display: "flex", flexDirection: "column", gap: "16px" }}
@@ -676,22 +676,22 @@ export default function ReservationsPage() {
               {[
                 {
                   icon: <Clock size={18} color="#E8541A" />,
-                  title: "Opening Hours",
+                  title: "Orari di apertura",
                   lines: [
-                    `Mon–Fri: ${RESTAURANT_INFO.hours.weekday}`,
-                    `Sat–Sun: ${RESTAURANT_INFO.hours.weekend}`,
+                    `Lun–Ven: ${RESTAURANT_INFO.hours.weekday}`,
+                    `Sab–Dom: ${RESTAURANT_INFO.hours.weekend}`,
                   ],
                 },
                 {
                   icon: <Users size={18} color="#E8541A" />,
-                  title: "Party Size",
+                  title: "Numero di ospiti",
                   lines: [
-                    "For 13+ guests, please call us directly to arrange.",
+                    "Per gruppi di oltre 12 persone, chiamaci per organizzare la prenotazione.",
                   ],
                 },
                 {
                   icon: <Phone size={18} color="#E8541A" />,
-                  title: "Phone",
+                  title: "Telefono",
                   lines: [RESTAURANT_INFO.phone],
                 },
                 {
@@ -759,7 +759,7 @@ export default function ReservationsPage() {
                     fontSize: "14px",
                   }}
                 >
-                  Reservation Policy
+                  Politica di prenotazione
                 </p>
                 <ul
                   style={{
@@ -770,10 +770,10 @@ export default function ReservationsPage() {
                   }}
                 >
                   {[
-                    "Tables held for 15 mins after booking time",
-                    "Free cancellation up to 2 hours before",
-                    "Large groups may require a deposit",
-                    "Dress code: Smart casual",
+                    "Il tavolo è riservato per 15 minuti dall’orario prenotato",
+                    "Cancellazione gratuita fino a 2 ore prima",
+                    "Per i gruppi numerosi potrebbe essere richiesta una caparra",
+                    "Abbigliamento: informale curato",
                   ].map((p) => (
                     <li
                       key={p}

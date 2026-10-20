@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return Response.json(
-      { error: "Invalid JSON request body." },
+      { error: "Il formato della richiesta JSON non è valido." },
       { status: 400 },
     );
   }
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
   const order = parseOrderRequest(body);
   if (!order) {
     return Response.json(
-      { error: "Order details are invalid." },
+      { error: "I dettagli dell’ordine non sono validi." },
       { status: 400 },
     );
   }
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
     const menuItem = menuById.get(requestedItem.id);
     if (!menuItem || !menuItem.available) {
       return Response.json(
-        { error: "One or more selected menu items are unavailable." },
+        { error: "Uno o più piatti selezionati non sono disponibili." },
         { status: 400 },
       );
     }
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     }
     console.error("Failed to save order to PostgreSQL.", error);
     return Response.json(
-      { error: "The order could not be saved. Please try again." },
+      { error: "Non è stato possibile salvare l’ordine. Riprova." },
       { status: 500 },
     );
   } finally {

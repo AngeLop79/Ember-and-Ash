@@ -30,23 +30,23 @@ type TrackingOrder = {
 const ORDERS: Record<string, TrackingOrder> = {
   "EA-DEMO1": {
     status: 2,
-    items: "Ember Jollof Rice × 2, Fried Plantain × 1",
-    type: "Delivery",
-    eta: "~20 mins",
+    items: "Riso jollof alla brace × 2, platano fritto × 1",
+    type: "Consegna a domicilio",
+    eta: "~20 min",
     demo: true,
   },
   "EA-DEMO2": {
     status: 4,
-    items: "T-Bone Steak × 1, Chapman × 2",
-    type: "Delivery",
-    eta: "~5 mins",
+    items: "Bistecca T-bone × 1, Chapman × 2",
+    type: "Consegna a domicilio",
+    eta: "~5 min",
     demo: true,
   },
   "EA-DEMO3": {
     status: 3,
-    items: "Suya Skewers × 3, Zobo Royale × 2",
-    type: "Pickup",
-    eta: "Ready!",
+    items: "Spiedini suya × 3, Zobo Royale × 2",
+    type: "Ritiro",
+    eta: "Pronto!",
     demo: true,
   },
 };
@@ -55,38 +55,38 @@ const STEPS = [
   {
     id: "placed",
     icon: <ThumbsUp size={20} />,
-    label: "Order Placed",
-    desc: "We received your order",
+    label: "Ordine ricevuto",
+    desc: "Abbiamo ricevuto il tuo ordine",
   },
   {
     id: "confirmed",
     icon: <CheckCircle size={20} />,
-    label: "Confirmed",
-    desc: "Kitchen accepted your order",
+    label: "Confermato",
+    desc: "La cucina ha accettato il tuo ordine",
   },
   {
     id: "preparing",
     icon: <ChefHat size={20} />,
-    label: "Preparing",
-    desc: "Chef is crafting your meal",
+    label: "In preparazione",
+    desc: "Lo chef sta preparando il tuo piatto",
   },
   {
     id: "ready",
     icon: <Package size={20} />,
-    label: "Ready",
-    desc: "Your order is packed & ready",
+    label: "Pronto",
+    desc: "Il tuo ordine è pronto",
   },
   {
     id: "delivery",
     icon: <Truck size={20} />,
-    label: "Out for Delivery",
-    desc: "Rider is on the way to you",
+    label: "In consegna",
+    desc: "Il corriere è in arrivo",
   },
   {
     id: "delivered",
     icon: <ThumbsUp size={20} />,
-    label: "Delivered",
-    desc: "Enjoy your meal! 🔥",
+    label: "Consegnato",
+    desc: "Buon appetito! 🔥",
   },
 ];
 
@@ -117,7 +117,7 @@ export default function TrackingPage() {
   const handleSearch = async () => {
     const id = orderId.trim().toUpperCase();
     if (!id) {
-      toast.error("Enter an order ID");
+      toast.error("Inserisci il codice dell’ordine");
       return;
     }
 
@@ -135,13 +135,18 @@ export default function TrackingPage() {
       const response = await fetch(`/api/orders/${encodeURIComponent(id)}`);
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Order not found.");
+        throw new Error(result.error || "Ordine non trovato.");
       }
 
       setOrderData({
         status: result.statusStep,
         items: result.items,
-        type: result.type,
+        type:
+          result.type === "delivery"
+            ? "Consegna a domicilio"
+            : result.type === "pickup"
+              ? "Ritiro"
+              : "Consumo al ristorante",
         eta: result.eta,
         cancelled: result.status === "cancelled",
       });
@@ -151,7 +156,7 @@ export default function TrackingPage() {
       setOrderData(null);
       setSearched(false);
       toast.error(
-        error instanceof Error ? error.message : "Could not look up this order.",
+        error instanceof Error ? error.message         : "Non è stato possibile cercare questo ordine.",
       );
     } finally {
       setSearching(false);
@@ -165,8 +170,8 @@ export default function TrackingPage() {
       const hasAccount = hasAccounts();
       toast.error(
         hasAccount
-          ? "Please log in with your email and password first"
-          : "Please sign up first before using WhatsApp",
+          ? "Accedi prima con la tua email e la tua password"
+          : "Crea un account prima di usare WhatsApp",
       );
       router.push("/auth?next=/tracking");
       return;
@@ -197,7 +202,7 @@ export default function TrackingPage() {
           style={{ maxWidth: "800px", margin: "0 auto" }}
         >
           <p className="section-label" style={{ marginBottom: "12px" }}>
-            Real-time updates
+            Aggiornamenti in tempo reale
           </p>
           <h1
             className="font-display tracking-title"
@@ -208,10 +213,10 @@ export default function TrackingPage() {
               marginBottom: "12px",
             }}
           >
-            Track Your Order
+            Traccia il tuo ordine
           </h1>
           <p style={{ color: "#8A7566", marginBottom: "32px" }}>
-            Enter your order ID below, or try the demo orders{" "}
+            Inserisci qui sotto il codice del tuo ordine oppure prova gli ordini demo{" "}
             <span
               style={{ color: "#E8541A", cursor: "pointer", fontWeight: 600 }}
               onClick={() => {
@@ -227,7 +232,7 @@ export default function TrackingPage() {
             >
               EA-DEMO2
             </span>{" "}
-            for a live demo.
+            per vedere la dimostrazione.
           </p>
           <div
             className="search-container tracking-search w-full max-w-full"
@@ -238,7 +243,7 @@ export default function TrackingPage() {
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="e.g. EA-DEMO1 or your order ID"
+              placeholder="Ad es. EA-DEMO1 o il codice del tuo ordine"
               style={{ flex: 1 }}
             />
             <button
@@ -256,7 +261,7 @@ export default function TrackingPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              <Search size={16} /> {searching ? "Searching..." : "Track"}
+              <Search size={16} /> {searching ? "Ricerca..." : "Traccia"}
             </button>
           </div>
         </div>
@@ -279,7 +284,7 @@ export default function TrackingPage() {
                 marginBottom: "12px",
               }}
             >
-              Where&apos;s my order?
+              Dov’è il mio ordine?
             </h2>
             <p
               style={{
@@ -288,8 +293,8 @@ export default function TrackingPage() {
                 lineHeight: "1.6",
               }}
             >
-              You&apos;ll find your order ID in the confirmation SMS we sent
-              you, or in your checkout confirmation screen.
+              Trovi il codice dell’ordine nell’SMS di conferma che ti abbiamo
+              inviato o nella schermata di conferma dell’acquisto.
             </p>
             <div
               style={{
@@ -314,12 +319,12 @@ export default function TrackingPage() {
                     gap: "8px",
                   }}
                 >
-                  <Phone size={16} /> Call Us
+                  <Phone size={16} /> Chiamaci
                 </button>
               </a>
               <button
                 onClick={() =>
-                  openWhatsApp("Hi! I'd like to check on my order status.")
+                openWhatsApp("Salve, vorrei avere aggiornamenti sul mio ordine.")
                 }
                 style={{
                   padding: "12px 24px",
@@ -335,7 +340,7 @@ export default function TrackingPage() {
                   gap: "8px",
                 }}
               >
-                <MessageCircle size={16} /> WhatsApp Us
+                <MessageCircle size={16} /> Scrivici su WhatsApp
               </button>
             </div>
           </div>
@@ -373,7 +378,7 @@ export default function TrackingPage() {
                       marginBottom: "4px",
                     }}
                   >
-                    Order ID
+                    Codice ordine
                   </p>
                   <p
                     className="font-display"
@@ -415,7 +420,7 @@ export default function TrackingPage() {
                       }}
                     />
                     {orderData?.cancelled
-                      ? "Cancelled"
+                      ? "Annullato"
                       : STEPS[currentStep].label}
                   </span>
                   {orderData && (
@@ -430,9 +435,9 @@ export default function TrackingPage() {
                         size={12}
                         style={{ display: "inline", marginRight: "4px" }}
                       />
-                      ETA:{" "}
+                      Consegna prevista:{" "}
                       {currentStep === STEPS.length - 1
-                        ? "Delivered ✓"
+                        ? "Consegnato ✓"
                         : orderData.eta}
                     </p>
                   )}
@@ -459,7 +464,7 @@ export default function TrackingPage() {
                         marginBottom: "4px",
                       }}
                     >
-                      Items
+                      Articoli
                     </p>
                     <p style={{ fontSize: "13px", color: "#F5EDD8" }}>
                       {orderData.items}
@@ -475,7 +480,7 @@ export default function TrackingPage() {
                         marginBottom: "4px",
                       }}
                     >
-                      Type
+                      Modalità
                     </p>
                     <p style={{ fontSize: "13px", color: "#F5EDD8" }}>
                       {orderData.type}
@@ -494,7 +499,7 @@ export default function TrackingPage() {
                   }}
                 >
                   <span style={{ fontSize: "12px", color: "#8A7566" }}>
-                    Progress
+                    Avanzamento
                   </span>
                   <span
                     style={{
@@ -667,10 +672,10 @@ export default function TrackingPage() {
                     marginBottom: "4px",
                   }}
                 >
-                  Need help with your order?
+                  Hai bisogno di aiuto con il tuo ordine?
                 </p>
                 <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                  Our team is available during restaurant hours
+                  Il nostro team è a tua disposizione durante gli orari di apertura
                 </p>
               </div>
               <div
@@ -692,7 +697,7 @@ export default function TrackingPage() {
                       gap: "6px",
                     }}
                   >
-                    <Phone size={14} /> Call
+                    <Phone size={14} /> Chiama
                   </button>
                 </a>
                 <button

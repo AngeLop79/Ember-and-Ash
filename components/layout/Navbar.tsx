@@ -20,7 +20,7 @@ const NAV_LINKS = [
   { href: "/menu", label: "Menu" },
   { href: "/order", label: "Ordini" },
   { href: "/reservations", label: "Prenotazioni" },
-  { href: "/tracking", label: "Track" },
+  { href: "/tracking", label: "Traccia ordine" },
 ];
 
 export default function Navbar() {
@@ -176,7 +176,7 @@ export default function Navbar() {
                 <span suppressHydrationWarning>
                   {isAuthenticated && user?.name
                     ? user.name.split(" ")[0]
-                    : "Account"}
+                    : "Profilo"}
                 </span>
               </button>
 
@@ -218,7 +218,7 @@ export default function Navbar() {
                             letterSpacing: "0.08em",
                           }}
                         >
-                          You are signed in
+                          Hai effettuato l’accesso
                         </span>
                         <span
                           suppressHydrationWarning
@@ -228,7 +228,7 @@ export default function Navbar() {
                             fontWeight: 700,
                           }}
                         >
-                          {user?.name || "Account"}
+                          {user?.name || "Profilo"}
                         </span>
                       </div>
 
@@ -258,7 +258,7 @@ export default function Navbar() {
                             background: "rgba(212,168,67,0.08)",
                           }}
                         >
-                          Create New Account
+                          Crea un nuovo account
                         </Link>
 
                         <button
@@ -278,7 +278,7 @@ export default function Navbar() {
                             textAlign: "left",
                           }}
                         >
-                          Log out
+                          Esci
                         </button>
                       </div>
                     </div>
@@ -304,7 +304,7 @@ export default function Navbar() {
                           background: "rgba(26,22,18,0.96)",
                         }}
                       >
-                        Sign In
+                        Accedi
                       </Link>
                       <Link
                         href="/auth"
@@ -320,7 +320,7 @@ export default function Navbar() {
                           background: "rgba(212,168,67,0.08)",
                         }}
                       >
-                        New Account
+                        Crea account
                       </Link>
                     </div>
                   )}
@@ -385,7 +385,7 @@ export default function Navbar() {
                 whiteSpace: "nowrap",
               }}
             >
-              Admin
+              Amministrazione
             </Link>
 
             {/* Mobile menu toggle */}
@@ -427,7 +427,7 @@ export default function Navbar() {
             }}
           >
             <button
-              aria-label="Close menu"
+              aria-label="Chiudi il menu"
               onClick={() => setMobileOpen(false)}
               style={{
                 position: "absolute",
@@ -472,7 +472,7 @@ export default function Navbar() {
                       fontWeight: 700,
                     }}
                   >
-                    Ember & Ash
+                    I ragazzi del sole
                   </span>
                 </div>
                 <button
@@ -583,13 +583,13 @@ export default function Navbar() {
                           letterSpacing: "0.08em",
                         }}
                       >
-                        You are signed in
+                        Hai effettuato l’accesso
                       </span>
                     )}
                     <span
                       style={{ color: isAuthenticated ? "#34D399" : "#F5EDD8" }}
                     >
-                      {isAuthenticated && user?.name ? user.name : "Account"}
+                      {isAuthenticated && user?.name ? user.name : "Profilo"}
                     </span>
                   </div>
                 </div>
@@ -612,7 +612,7 @@ export default function Navbar() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span>Sign In</span>
+                      <span>Accedi</span>
                       <ChevronRight size={16} color="#8A7566" />
                     </Link>
 
@@ -632,7 +632,7 @@ export default function Navbar() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span>Create New Account</span>
+                      <span>Crea un nuovo account</span>
                       <ChevronRight size={16} color="#D4A843" />
                     </Link>
                   </>
@@ -657,7 +657,7 @@ export default function Navbar() {
                       cursor: "pointer",
                     }}
                   >
-                    <span>Log out</span>
+                    <span>Esci</span>
                     <LogOut size={16} />
                   </button>
                 )}
@@ -680,7 +680,7 @@ export default function Navbar() {
                     letterSpacing: "0.08em",
                   }}
                 >
-                  <span>Admin</span>
+                  <span>Amministrazione</span>
                   <ChevronRight size={16} />
                 </Link>
               </div>

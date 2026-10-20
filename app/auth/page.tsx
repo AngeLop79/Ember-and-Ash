@@ -35,7 +35,7 @@ export default function AuthPage() {
     const password = signinForm.password;
 
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      toast.error("Inserisci email e password");
       return;
     }
 
@@ -47,13 +47,13 @@ export default function AuthPage() {
 
     if (!account) {
       setLoading(false);
-      toast.error("Account not found. Please sign up first.");
+      toast.error("Account non trovato. Registrati prima.");
       return;
     }
 
     signIn({ name: account.name, email: account.email, phone: account.phone });
     setLoading(false);
-    toast.success("Welcome back");
+    toast.success("Bentornato!");
     setSuccessState({ name: account.name, action: "logged in" });
   };
 
@@ -66,17 +66,17 @@ export default function AuthPage() {
     const confirmPassword = signupForm.confirmPassword;
 
     if (!name || !email || !password) {
-      toast.error("Name, email and password are required");
+      toast.error("Nome, email e password sono obbligatori");
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("La password deve contenere almeno 6 caratteri");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Le password non coincidono");
       return;
     }
 
@@ -87,7 +87,7 @@ export default function AuthPage() {
     );
     if (exists) {
       setLoading(false);
-      toast.error("Email already exists. Please sign in.");
+      toast.error("Questa email è già registrata. Accedi.");
       return;
     }
 
@@ -95,7 +95,7 @@ export default function AuthPage() {
     saveAccounts([...accounts, newAccount]);
     signIn({ name, email, phone });
     setLoading(false);
-    toast.success("Account created");
+    toast.success("Account creato");
     setSuccessState({ name, action: "signed up" });
   };
 
@@ -143,8 +143,8 @@ export default function AuthPage() {
             style={{ marginBottom: "10px", color: "#34D399" }}
           >
             {successState.action === "logged in"
-              ? "Login successful"
-              : "Sign up successful"}
+              ? "Accesso effettuato"
+              : "Registrazione completata"}
           </p>
           <h1
             className="font-display"
@@ -155,7 +155,7 @@ export default function AuthPage() {
               marginBottom: "10px",
             }}
           >
-            Welcome, {successState.name}
+            Benvenuto, {successState.name}
           </h1>
           <p
             style={{
@@ -164,7 +164,7 @@ export default function AuthPage() {
               lineHeight: "1.6",
             }}
           >
-            Your account is active and you are now signed in.
+            Il tuo account è attivo e hai effettuato l’accesso.
           </p>
           <button
             onClick={() => router.push("/")}
@@ -176,7 +176,7 @@ export default function AuthPage() {
               fontWeight: 700,
             }}
           >
-            Go Back Home
+            Torna alla home
           </button>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function AuthPage() {
         style={{ width: "100%", maxWidth: "520px", padding: "28px" }}
       >
         <p className="section-label" style={{ marginBottom: "10px" }}>
-          Customer Account
+          Account cliente
         </p>
         <h1
           className="font-display auth-title"
@@ -212,8 +212,8 @@ export default function AuthPage() {
           }}
         >
           {mode === "signin"
-            ? "Login with Email"
-            : "Create Account"}
+            ? "Accedi con email"
+            : "Crea un account"}
         </h1>
 
         <div className="auth-toggle-row" style={{ display: "flex", gap: "8px", marginBottom: "24px" }}>
@@ -232,7 +232,7 @@ export default function AuthPage() {
               transition: "all 0.2s",
             }}
           >
-            Sign In
+            Accedi
           </button>
           <button
             onClick={() => setMode("signup")}
@@ -249,7 +249,7 @@ export default function AuthPage() {
               transition: "all 0.2s",
             }}
           >
-            Sign Up
+            Registrati
           </button>
         </div>
 
@@ -270,12 +270,12 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Email
+                Indirizzo email
               </label>
               <input
                 className="input-field"
                 type="email"
-                placeholder="you@email.com"
+                placeholder="tu@email.it"
                 value={signinForm.email}
                 onChange={(event) =>
                   setSigninForm({ ...signinForm, email: event.target.value })
@@ -298,7 +298,7 @@ export default function AuthPage() {
               <input
                 className="input-field"
                 type="password"
-                placeholder="Enter password"
+                placeholder="Inserisci la password"
                 value={signinForm.password}
                 onChange={(event) =>
                   setSigninForm({ ...signinForm, password: event.target.value })
@@ -316,10 +316,10 @@ export default function AuthPage() {
                 fontWeight: 700,
               }}
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loading ? "Accesso in corso..." : "Accedi"}
             </button>
             <p className="auth-switch-copy" style={{ marginTop: "8px", fontSize: "13px", color: "#8A7566", textAlign: "center" }}>
-              Don&apos;t have an account?{" "}
+              Non hai un account?{" "}
               <button
                 type="button"
                 onClick={() => setMode("signup")}
@@ -332,7 +332,7 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Sign up
+                Registrati
               </button>
             </p>
           </form>
@@ -353,11 +353,11 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Full Name
+                Nome e cognome
               </label>
               <input
                 className="input-field"
-                placeholder="Your name"
+                placeholder="Il tuo nome"
                 value={signupForm.name}
                 onChange={(event) =>
                   setSignupForm({ ...signupForm, name: event.target.value })
@@ -375,12 +375,12 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Email
+                Indirizzo email
               </label>
               <input
                 className="input-field"
                 type="email"
-                placeholder="you@email.com"
+                placeholder="tu@email.it"
                 value={signupForm.email}
                 onChange={(event) =>
                   setSignupForm({ ...signupForm, email: event.target.value })
@@ -398,12 +398,12 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Phone
+                Telefono
               </label>
               <input
                 className="input-field"
                 type="tel"
-                placeholder="+234..."
+                placeholder="+39..."
                 value={signupForm.phone}
                 onChange={(event) =>
                   setSignupForm({ ...signupForm, phone: event.target.value })
@@ -434,7 +434,7 @@ export default function AuthPage() {
                 <input
                   className="input-field"
                   type="password"
-                  placeholder="At least 6 chars"
+                  placeholder="Almeno 6 caratteri"
                   value={signupForm.password}
                   onChange={(event) =>
                     setSignupForm({
@@ -455,12 +455,12 @@ export default function AuthPage() {
                     fontWeight: 600,
                   }}
                 >
-                  Confirm
+                  Conferma password
                 </label>
                 <input
                   className="input-field"
                   type="password"
-                  placeholder="Repeat password"
+                  placeholder="Ripeti la password"
                   value={signupForm.confirmPassword}
                   onChange={(event) =>
                     setSignupForm({
@@ -482,10 +482,10 @@ export default function AuthPage() {
                 fontWeight: 700,
               }}
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "Creazione account..." : "Crea account"}
             </button>
             <p className="auth-switch-copy" style={{ marginTop: "8px", fontSize: "13px", color: "#8A7566", textAlign: "center" }}>
-              Already have an account?{" "}
+              Hai già un account?{" "}
               <button
                 type="button"
                 onClick={() => setMode("signin")}
@@ -498,14 +498,14 @@ export default function AuthPage() {
                   fontWeight: 600,
                 }}
               >
-                Login here
+                Accedi
               </button>
             </p>
           </form>
         )}
 
         <p className="auth-guest-copy" style={{ marginTop: "24px", fontSize: "13px", color: "#8A7566", textAlign: "center", borderTop: "1px solid #3D3028", paddingTop: "16px" }}>
-          Continue as guest? Go back to{" "}
+          Vuoi continuare come ospite? Torna al{" "}
           <Link href="/menu" style={{ color: "#D4A843", fontWeight: 600 }}>
             menu
           </Link>

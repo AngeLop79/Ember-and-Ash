@@ -2,14 +2,14 @@ import { MenuItem } from "@/types";
 
 export const RESTAURANT_INFO = {
   name: "I ragazzi del sole",
-  tagline: "Fire-crafted flavours, rooted in tradition",
-  phone: "+2347065968213",
-  whatsapp: "+2347065968213",
-  email: "hello@emberandash.com",
-  address: "14 Wetheral Road, Owerri, Imo State",
+  tagline: "Sapori alla brace, radicati nella tradizione",
+  phone: "+393205666459",
+  whatsapp: "+393205666459",
+  email: "associazioneiragazzidelsole@gmail.com",
+  address: "Viale Calabricata, Sellia Marina, Catanzaro, Italy",
   hours: {
-    weekday: "11:00 AM – 10:00 PM",
-    weekend: "10:00 AM – 11:00 PM",
+    weekday: "19:00  – 00:00",
+    weekend: "10:00 – 23:00",
   },
   closingHour: {
     weekday: 22,
@@ -21,22 +21,22 @@ export const RESTAURANT_INFO = {
 };
 
 export const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "starters", label: "Starters" },
-  { id: "mains", label: "Mains" },
-  { id: "grills", label: "Grills" },
-  { id: "soups", label: "Soups" },
-  { id: "sides", label: "Sides" },
-  { id: "drinks", label: "Drinks" },
-  { id: "desserts", label: "Desserts" },
+  { id: "all", label: "Tutti" },
+  { id: "starters", label: "Antipasti" },
+  { id: "mains", label: "Piatti principali" },
+  { id: "grills", label: "Griglia" },
+  { id: "soups", label: "Zuppe" },
+  { id: "sides", label: "Contorni" },
+  { id: "drinks", label: "Bevande" },
+  { id: "desserts", label: "Dolci" },
 ];
 
 export const MENU_ITEMS: MenuItem[] = [
   {
     id: "1",
-    name: "Peppered Snail",
+    name: "Lumache piccanti",
     description:
-      "Giant African snails slow-cooked in our signature pepper sauce with aromatic spices",
+      "Lumache africane di grandi dimensioni, cotte lentamente nella nostra salsa piccante della casa con spezie aromatiche",
     price: 4500,
     category: "starters",
     image:
@@ -49,9 +49,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "2",
-    name: "Suya Skewers",
+    name: "Spiedini di suya",
     description:
-      "Tender beef skewers marinated in spiced groundnut paste, grilled over open flame",
+      "Teneri spiedini di manzo marinati in una pasta speziata di arachidi e grigliati a fiamma viva",
     price: 3800,
     category: "grills",
     image:
@@ -66,7 +66,7 @@ export const MENU_ITEMS: MenuItem[] = [
     id: "3",
     name: "Ofe Onugbu",
     description:
-      "Traditional bitter leaf soup with assorted meat, stockfish and palm oil",
+      "Zuppa tradizionale di foglie amare con carni miste, stoccafisso e olio di palma",
     price: 5200,
     category: "soups",
     image:
@@ -79,9 +79,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "4",
-    name: "Ember Jollof Rice",
+    name: "Riso jollof alla brace",
     description:
-      "Smoky tomato-based rice with charred edges, served with grilled chicken & fried plantain",
+      "Riso al pomodoro dal gusto affumicato e dai bordi tostati, servito con pollo alla griglia e platano fritto",
     price: 4800,
     category: "mains",
     image:
@@ -94,9 +94,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "5",
-    name: "T-Bone Steak",
+    name: "Bistecca T-bone",
     description:
-      "1kg prime T-bone, flame-grilled to your preference with herb butter & roasted vegetables",
+      "T-bone di prima scelta da 1 kg, cotta alla brace secondo il tuo gusto e servita con burro alle erbe e verdure arrosto",
     price: 18500,
     category: "grills",
     image:
@@ -109,9 +109,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "6",
-    name: "Egusi Soup",
+    name: "Zuppa di egusi",
     description:
-      "Ground melon seeds cooked with spinach, assorted meats and crayfish in palm oil",
+      "Semi di melone macinati, cotti con spinaci, carni miste, gamberetti e olio di palma",
     price: 4900,
     category: "soups",
     image:
@@ -124,9 +124,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "7",
-    name: "Pounded Yam",
+    name: "Igname pestato",
     description:
-      "Smooth, stretchy pounded yam — the perfect swallow for any soup",
+      "Purè di igname morbido ed elastico, l’accompagnamento perfetto per ogni zuppa",
     price: 1200,
     category: "sides",
     image:
@@ -139,9 +139,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "8",
-    name: "Fried Plantain",
+    name: "Platano fritto",
     description:
-      "Ripe plantains fried golden and caramelized — a Lagos essential",
+      "Platano maturo fritto fino a diventare dorato e caramellato: una specialità di Lagos",
     price: 900,
     category: "sides",
     image:
@@ -156,7 +156,7 @@ export const MENU_ITEMS: MenuItem[] = [
     id: "9",
     name: "Zobo Royale",
     description:
-      "Premium hibiscus drink infused with ginger, cloves and citrus. Served chilled.",
+      "Bevanda pregiata all’ibisco con zenzero, chiodi di garofano e agrumi, servita fredda",
     price: 1500,
     category: "drinks",
     image:
@@ -171,7 +171,7 @@ export const MENU_ITEMS: MenuItem[] = [
     id: "10",
     name: "Chapman",
     description:
-      "Classic Nigerian cocktail — Fanta, Sprite, Ribena, cucumber and Angostura bitters",
+      "Cocktail nigeriano classico con Fanta, Sprite, Ribena, cetriolo e bitter Angostura",
     price: 1800,
     category: "drinks",
     image:
@@ -184,9 +184,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "11",
-    name: "Catfish Pepper Soup",
+    name: "Zuppa piccante di pesce gatto",
     description:
-      "Fresh point-and-kill catfish in fiery pepper soup broth with uziza leaves",
+      "Pesce gatto fresco in un intenso brodo piccante con foglie di uziza",
     price: 6500,
     category: "soups",
     image:
@@ -199,9 +199,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "12",
-    name: "Lava Cake",
+    name: "Tortino dal cuore morbido",
     description:
-      "Warm chocolate fondant with molten centre, served with vanilla ice cream",
+      "Tortino caldo al cioccolato dal cuore morbido, servito con gelato alla vaniglia",
     price: 2800,
     category: "desserts",
     image:
@@ -214,9 +214,9 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
     id: "13",
-    name: "Lamb Chops",
+    name: "Costolette d'agnello",
     description:
-      "French-cut lamb chops in mint-pepper marinade, grilled over hardwood charcoal",
+      "Costolette d’agnello tagliate alla francese, marinate alla menta e pepe e grigliate su brace di legna",
     price: 12000,
     category: "grills",
     image:
@@ -231,7 +231,7 @@ export const MENU_ITEMS: MenuItem[] = [
     id: "14",
     name: "Asun",
     description:
-      "Smoked goat meat in a ferocious pepper and onion sauce — an Owambe staple",
+      "Carne di capra affumicata in una salsa intensa di peperoncino e cipolla, immancabile durante l’Owambe",
     price: 5500,
     category: "starters",
     image:
@@ -246,7 +246,7 @@ export const MENU_ITEMS: MenuItem[] = [
     id: "15",
     name: "Nkwobi",
     description:
-      "Spiced cow foot in a rich ugba and palm kernel paste — slow cooked to perfection",
+      "Zampetto di manzo speziato in una ricca crema di ugba e semi di palma, cotto lentamente a puntino",
     price: 5800,
     category: "starters",
     image:
@@ -260,23 +260,23 @@ export const MENU_ITEMS: MenuItem[] = [
 ];
 
 export const TIMES = [
-  "12:00 PM",
-  "12:30 PM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-  "5:00 PM",
-  "5:30 PM",
-  "6:00 PM",
-  "6:30 PM",
-  "7:00 PM",
-  "7:30 PM",
-  "8:00 PM",
-  "8:30 PM",
-  "9:00 PM",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30",
+  "19:00",
+  "19:30",
+  "20:00",
+  "20:30",
+  "21:00",
 ];

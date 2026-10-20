@@ -20,7 +20,7 @@ export default function MenuCard({ item }: MenuCardProps) {
   const handleAdd = () => {
     addItem(item);
     setAdded(true);
-    toast.success(`${item.name} added to order`);
+    toast.success(`${item.name} aggiunto all’ordine`);
     setTimeout(() => setAdded(false), 1500);
   };
 
@@ -57,12 +57,12 @@ export default function MenuCard({ item }: MenuCardProps) {
         <div style={{ position: "absolute", top: "10px", left: "10px", display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {item.featured && (
             <span className="badge" style={{ background: "#E8541A", color: "white" }}>
-              Featured
+              In evidenza
             </span>
           )}
           {item.tags.includes("bestseller") && (
             <span className="badge" style={{ background: "#D4A843", color: "#1A1612" }}>
-              Bestseller
+              Più venduto
             </span>
           )}
         </div>
@@ -72,7 +72,7 @@ export default function MenuCard({ item }: MenuCardProps) {
             position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <span style={{ color: "#8A7566", fontWeight: 600, fontSize: "14px" }}>Unavailable</span>
+            <span style={{ color: "#8A7566", fontWeight: 600, fontSize: "14px" }}>Non disponibile</span>
           </div>
         )}
       </div>
@@ -103,7 +103,7 @@ export default function MenuCard({ item }: MenuCardProps) {
             )}
             {inCart && (
               <span style={{ fontSize: "12px", color: "#D4A843", fontWeight: 600 }}>
-                ×{inCart.quantity} in cart
+                ×{inCart.quantity} nel carrello
               </span>
             )}
           </div>

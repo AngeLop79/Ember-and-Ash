@@ -24,7 +24,7 @@ export default function HomePage() {
   const { addItem, openCart } = useCartStore();
   const handleAdd = (item: (typeof MENU_ITEMS)[0]) => {
     addItem(item);
-    toast.success(`${item.name} added!`);
+    toast.success(`${item.name} aggiunto al carrello!`);
     openCart();
   };
 
@@ -33,14 +33,14 @@ export default function HomePage() {
       const hasAccount = hasAccounts();
       toast.error(
         hasAccount
-          ? "Please log in with your email and password first"
-          : "Please sign up first before using WhatsApp",
+          ? "Accedi prima con la tua email e la tua password"
+          : "Crea un account prima di usare WhatsApp",
       );
       router.push("/auth?next=/");
       return;
     }
     const message = encodeURIComponent(
-      "Hello Ember & Ash! I'd like to place an order 🔥",
+      "Salve I ragazzi del sole! Vorrei effettuare un ordine 🔥",
     );
     window.open(
       `https://wa.me/${RESTAURANT_INFO.whatsapp.replace(/\+/g, "")}?text=${message}`,
@@ -96,7 +96,7 @@ export default function HomePage() {
           }}
         >
           <p className="section-label " style={{marginTop: "13px", marginBottom: "24px" }}>
-            🔥 Ordinazione aperte
+            🔥 Le ordinazioni sono aperte
           </p>
           <h1
             className="font-display mobile-title"
@@ -133,8 +133,7 @@ export default function HomePage() {
               marginBottom: "48px",
             }}
           >
-            La tradizione calabrese, il gusto della cucina contadina e il profumo del maiale alla brace.  e tradizione, nel cuore della nostra comunità.
-            Una festa di sapori autentici, convivialità
+            La tradizione calabrese, il gusto della cucina contadina e il profumo del maiale alla brace: una festa di sapori autentici e convivialità, nel cuore della nostra comunità.
           </p>
           <div
             className="mobile-stack mobile-small-gap"
@@ -152,7 +151,7 @@ export default function HomePage() {
                   gap: "10px",
                 }}
               >
-                Explore Menu <ArrowRight size={18} />
+                Scopri il menu <ArrowRight size={18} />
               </button>
             </Link>
             <Link href="/reservations" style={{ textDecoration: "none" }}>
@@ -167,7 +166,7 @@ export default function HomePage() {
                   gap: "10px",
                 }}
               >
-                <Calendar size={18} /> Book a Table
+                <Calendar size={18} /> Prenota un tavolo
               </button>
             </Link>
           </div>
@@ -181,10 +180,10 @@ export default function HomePage() {
             }}
           >
             {[
-              { label: "Menu items", value: "50+" },
-              { label: "Happy guests", value: "12k+" },
-              { label: "Years of flame", value: "8" },
-              { label: "Rating", value: "4.9★" },
+              { label: "Piatti in menu", value: "50+" },
+              { label: "Ospiti soddisfatti", value: "12k+" },
+              { label: "Anni di brace", value: "8" },
+              { label: "Valutazione", value: "4.9★" },
             ].map((stat) => (
               <div key={stat.label}>
                 <p
@@ -229,13 +228,13 @@ export default function HomePage() {
         >
           <div>
             <p className="section-label" style={{ marginBottom: "12px" }}>
-              Our Signatures
+              Le nostre specialità
             </p>
             <h2
               className="font-display"
               style={{ fontSize: "40px", fontWeight: 700, color: "#F5EDD8" }}
             >
-              {"Chef's Favourites"}
+              {"I preferiti dello chef"}
             </h2>
           </div>
           <Link href="/menu" style={{ textDecoration: "none" }}>
@@ -249,7 +248,7 @@ export default function HomePage() {
                 gap: "6px",
               }}
             >
-              Full Menu <ArrowRight size={16} />
+              Tutto il menu <ArrowRight size={16} />
             </span>
           </Link>
         </div>
@@ -289,7 +288,7 @@ export default function HomePage() {
                     color: "white",
                   }}
                 >
-                  Featured
+                  In evidenza
                 </span>
               </div>
               <div style={{ padding: "16px" }}>
@@ -340,7 +339,7 @@ export default function HomePage() {
                       fontSize: "13px",
                     }}
                   >
-                    Add
+                    Aggiungi
                   </button>
                 </div>
               </div>
@@ -363,7 +362,7 @@ export default function HomePage() {
             className="section-label"
             style={{ marginBottom: "12px", textAlign: "center" }}
           >
-            Simple as fire
+            Semplice come il fuoco
           </p>
           <h2
             className="font-display"
@@ -375,7 +374,7 @@ export default function HomePage() {
               marginBottom: "48px",
             }}
           >
-            How to Order
+            Come ordinare
           </h2>
           <div
             style={{
@@ -387,26 +386,26 @@ export default function HomePage() {
             {[
               {
                 step: "01",
-                title: "Browse Menu",
-                desc: "Explore fire-crafted dishes across starters, mains, grills, soups and more.",
+                title: "Sfoglia il menu",
+                desc: "Scopri i piatti alla brace: antipasti, primi, grigliate, zuppe e molto altro.",
                 icon: "🍽️",
               },
               {
                 step: "02",
-                title: "Build Your Order",
-                desc: "Add items to cart. Customize portions and leave special notes.",
+                title: "Componi il tuo ordine",
+                desc: "Aggiungi i piatti al carrello, scegli le quantità e inserisci eventuali richieste.",
                 icon: "🛒",
               },
               {
                 step: "03",
-                title: "Choose How",
-                desc: "Delivery, pickup, or dine-in. Pay by card, transfer or cash.",
+                title: "Scegli come riceverlo",
+                desc: "Consegna a domicilio, ritiro o consumo al ristorante. Paga con carta, bonifico o contanti.",
                 icon: "🛵",
               },
               {
                 step: "04",
-                title: "Track & Enjoy",
-                desc: "Follow your order in real-time and enjoy every ember-kissed bite.",
+                title: "Segui l’ordine e gusta",
+                desc: "Segui l’avanzamento dell’ordine e assapora ogni boccone cotto alla brace.",
                 icon: "🔥",
               },
             ].map((s) => (
@@ -490,7 +489,7 @@ export default function HomePage() {
                 marginBottom: "12px",
               }}
             >
-              Order on WhatsApp
+              Ordina su WhatsApp
             </h2>
             <p
               style={{
@@ -500,8 +499,8 @@ export default function HomePage() {
                 lineHeight: "1.6",
               }}
             >
-              Prefer to chat? Message us directly. We&apos;ll confirm your order
-              and keep you updated every step of the way.
+              Preferisci scriverci? Contattaci direttamente: confermeremo il tuo
+              ordine e ti terremo aggiornato in ogni fase.
             </p>
           </div>
           <button
@@ -520,7 +519,7 @@ export default function HomePage() {
               gap: "10px",
             }}
           >
-            <MessageCircle size={22} /> Chat Now
+            <MessageCircle size={22} /> Scrivici
           </button>
         </div>
       </section>
@@ -558,7 +557,7 @@ export default function HomePage() {
                   marginBottom: "4px",
                 }}
               >
-                Location
+                Dove siamo
               </p>
               <p style={{ fontSize: "13px", color: "#8A7566" }}>
                 {RESTAURANT_INFO.address}
@@ -581,13 +580,13 @@ export default function HomePage() {
                   marginBottom: "4px",
                 }}
               >
-                Hours
+                Orari
               </p>
               <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                Mon–Fri: {RESTAURANT_INFO.hours.weekday}
+                Lun–Ven: {RESTAURANT_INFO.hours.weekday}
               </p>
               <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                Sat–Sun: {RESTAURANT_INFO.hours.weekend}
+                Sab–Dom: {RESTAURANT_INFO.hours.weekend}
               </p>
             </div>
           </div>
@@ -607,13 +606,13 @@ export default function HomePage() {
                   marginBottom: "4px",
                 }}
               >
-                Delivery
+                Consegna
               </p>
               <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                Within {RESTAURANT_INFO.deliveryRadius}
+                Entro {RESTAURANT_INFO.deliveryRadius}
               </p>
               <p style={{ fontSize: "13px", color: "#D4A843" }}>
-                Free above {formatPrice(RESTAURANT_INFO.freeDeliveryAbove)}
+                Gratuita sopra {formatPrice(RESTAURANT_INFO.freeDeliveryAbove)}
               </p>
             </div>
           </div>
@@ -627,8 +626,8 @@ export default function HomePage() {
           textAlign: "center",
         }}
       >
-        <p style={{ fontSize: "13px", color: "#3D3028" }}>
-          © 2026 Ember & Ash Restaurant ·{" "}
+        <p style={{ fontSize: "13px", color: "#f4ecb9" }}>
+          © 2026 I ragazzi del sole ·{" "}
           <a
             href={`tel:${RESTAURANT_INFO.phone}`}
             style={{ color: "#8A7566", textDecoration: "none" }}

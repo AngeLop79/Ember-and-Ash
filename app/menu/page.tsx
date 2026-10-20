@@ -31,7 +31,7 @@ export default function MenuPage() {
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <p className="section-label" style={{ marginBottom: "12px" }}>
-            Fire-crafted dishes
+            Piatti preparati alla brace
           </p>
           <h1
             className="font-display menu-title"
@@ -42,7 +42,7 @@ export default function MenuPage() {
               marginBottom: "32px",
             }}
           >
-            Our Menu
+            Il nostro menu
           </h1>
           <div
             className="font-display menu-title menu-search-wrapper"
@@ -67,8 +67,8 @@ export default function MenuPage() {
             <input
               className="input-field w-full max-w-full"
               type="text"
-              placeholder="Search dishes..."
-              aria-label="Search dishes"
+              placeholder="Cerca un piatto..."
+              aria-label="Cerca un piatto"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{ paddingLeft: "44px" }}
@@ -94,9 +94,9 @@ export default function MenuPage() {
                 marginBottom: "8px",
               }}
             >
-              Nothing found
+              Nessun risultato
             </p>
-            <p>Try a different category or search term</p>
+            <p>Prova un’altra categoria o un termine di ricerca</p>
           </div>
         ) : (
           <>
@@ -107,8 +107,7 @@ export default function MenuPage() {
                 marginBottom: "24px",
               }}
             >
-              {filtered.length} {filtered.length === 1 ? "dish" : "dishes"}{" "}
-              found
+              {filtered.length} {filtered.length === 1 ? "piatto trovato" : "piatti trovati"}
             </p>
             <div
               className="mobile-grid-1 menu-grid"

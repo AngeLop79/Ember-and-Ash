@@ -15,7 +15,7 @@ import {
   Bell,
   Flame,
 } from "lucide-react";
-import { MENU_ITEMS } from "@/lib/data";
+import { CATEGORIES, MENU_ITEMS } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
@@ -47,25 +47,25 @@ const RESERVATIONS = [
     id: "RES-AA1B",
     name: "Chinedu Okeke",
     date: "2024-12-28",
-    time: "7:00 PM",
+    time: "19:00",
     guests: 4,
     status: "confirmed",
-    requests: "Anniversary dinner, rose petals please",
+    requests: "Cena per anniversario, con petali di rosa",
   },
   {
     id: "RES-BB2C",
     name: "Fatima Abubakar",
     date: "2024-12-28",
-    time: "8:00 PM",
+    time: "20:00",
     guests: 6,
     status: "pending",
-    requests: "Vegetarian options needed",
+    requests: "Preferenza per piatti vegetariani",
   },
   {
     id: "RES-CC3D",
     name: "Oluwafemi Balogun",
     date: "2024-12-29",
-    time: "1:00 PM",
+    time: "13:00",
     guests: 2,
     status: "confirmed",
     requests: "",
@@ -74,10 +74,10 @@ const RESERVATIONS = [
     id: "RES-DD4E",
     name: "Amara Okafor",
     date: "2024-12-29",
-    time: "6:30 PM",
+    time: "18:30",
     guests: 10,
     status: "pending",
-    requests: "Birthday celebration, need cake service",
+    requests: "Festa di compleanno, gradito servizio torta",
   },
 ];
 
@@ -85,33 +85,39 @@ const STATUS_CONFIG: Record<
   string,
   { label: string; color: string; bg: string }
 > = {
-  pending: { label: "Pending", color: "#D4A843", bg: "rgba(212,168,67,0.12)" },
+  pending: { label: "In attesa", color: "#D4A843", bg: "rgba(212,168,67,0.12)" },
   confirmed: {
-    label: "Confirmed",
+    label: "Confermato",
     color: "#60A5FA",
     bg: "rgba(96,165,250,0.12)",
   },
   preparing: {
-    label: "Preparing",
+    label: "In preparazione",
     color: "#E8541A",
     bg: "rgba(232,84,26,0.12)",
   },
-  ready: { label: "Ready", color: "#A78BFA", bg: "rgba(167,139,250,0.12)" },
+  ready: { label: "Pronto", color: "#A78BFA", bg: "rgba(167,139,250,0.12)" },
   "out-for-delivery": {
-    label: "On the Way",
+    label: "In consegna",
     color: "#34D399",
     bg: "rgba(52,211,153,0.12)",
   },
   delivered: {
-    label: "Delivered",
+    label: "Consegnato",
     color: "#6EE7B7",
     bg: "rgba(110,231,183,0.12)",
   },
   cancelled: {
-    label: "Cancelled",
+    label: "Annullato",
     color: "#F87171",
     bg: "rgba(248,113,113,0.12)",
   },
+};
+
+const ORDER_TYPE_LABELS: Record<string, string> = {
+  delivery: "Consegna a domicilio",
+  pickup: "Ritiro",
+  "dine-in": "Consumo al ristorante",
 };
 
 export default function AdminPage() {
@@ -133,7 +139,7 @@ export default function AdminPage() {
 
   const loadOrders = async () => {
     if (!adminApiKey.trim()) {
-      toast.error("Enter the admin API key from your server configuration.");
+      toast.error("Inserisci la chiave API admin configurata sul server.");
       return;
     }
 
@@ -144,13 +150,13 @@ export default function AdminPage() {
       });
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Could not load orders.");
+        throw new Error(result.error || "Impossibile caricare gli ordini.");
       }
       setOrders(result.orders);
-      toast.success("Orders loaded from PostgreSQL.");
+      toast.success("Ordini caricati da PostgreSQL.");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Could not load orders.",
+        error instanceof Error ? error.message : "Impossibile caricare gli ordini.",
       );
     } finally {
       setLoadingOrders(false);
@@ -172,19 +178,19 @@ export default function AdminPage() {
       );
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Could not update order status.");
+        throw new Error(result.error || "Impossibile aggiornare lo stato dell’ordine.");
       }
       setOrders((current) =>
         current.map((order) =>
           order.id === id ? { ...order, status: result.status } : order,
         ),
       );
-      toast.success("Order status updated.");
+      toast.success("Stato dell’ordine aggiornato.");
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not update order status.",
+          : "Impossibile aggiornare lo stato dell’ordine.",
       );
     }
   };
@@ -196,20 +202,20 @@ export default function AdminPage() {
   };
 
   const TABS = [
-    { id: "overview", label: "Overview", icon: <LayoutDashboard size={16} /> },
+    { id: "overview", label: "Riepilogo", icon: <LayoutDashboard size={16} /> },
     {
       id: "orders",
-      label: "Orders",
+      label: "Ordini",
       icon: <ShoppingBag size={16} />,
       badge: activeOrders,
     },
     {
       id: "reservations",
-      label: "Reservations",
+      label: "Prenotazioni",
       icon: <Calendar size={16} />,
       badge: reservations.filter((r) => r.status === "pending").length,
     },
-    { id: "menu", label: "Menu Items", icon: <ChefHat size={16} /> },
+    { id: "menu", label: "Piatti del menu", icon: <ChefHat size={16} /> },
   ] as const;
 
   // Show sign-in prompt if not authenticated
@@ -261,7 +267,7 @@ export default function AdminPage() {
               marginBottom: "12px",
             }}
           >
-            Admin Dashboard
+            Pannello di amministrazione
           </h1>
           <p
             style={{
@@ -271,8 +277,7 @@ export default function AdminPage() {
               lineHeight: "1.6",
             }}
           >
-            Sign in to access the admin dashboard and manage orders,
-            reservations, and menu items.
+            Accedi per gestire ordini, prenotazioni e piatti del menu.
           </p>
           <Link href="/auth" style={{ textDecoration: "none" }}>
             <button
@@ -288,7 +293,7 @@ export default function AdminPage() {
                 cursor: "pointer",
               }}
             >
-              Sign In to Admin
+              Accedi al pannello admin
             </button>
           </Link>
           <Link
@@ -312,7 +317,7 @@ export default function AdminPage() {
                 cursor: "pointer",
               }}
             >
-              Back to Home
+              Torna alla home
             </button>
           </Link>
         </div>
@@ -369,10 +374,10 @@ export default function AdminPage() {
                 className="font-display"
                 style={{ fontSize: "22px", fontWeight: 700, color: "#F5EDD8" }}
               >
-                Admin Dashboard Demo
+                Console amministrativa
               </h1>
               <p style={{ fontSize: "12px", color: "#8A7566" }}>
-                Ember & Ash Restaurant
+                I Ragazzi del Sole
               </p>
             </div>
           </div>
@@ -396,7 +401,7 @@ export default function AdminPage() {
                   display: "inline-block",
                 }}
               />
-              Restaurant Open
+              Ristorante aperto
             </div>
             <button
               style={{
@@ -517,7 +522,7 @@ export default function AdminPage() {
                 marginBottom: "6px",
               }}
             >
-              Admin API key (configured in server .env)
+              Chiave API admin (configurata nel file .env del server)
             </span>
             <input
               className="input-field"
@@ -525,7 +530,7 @@ export default function AdminPage() {
               autoComplete="off"
               value={adminApiKey}
               onChange={(event) => setAdminApiKey(event.target.value)}
-              placeholder="Enter admin API key"
+              placeholder="Inserisci la chiave API admin"
             />
           </label>
           <button
@@ -538,7 +543,7 @@ export default function AdminPage() {
               opacity: loadingOrders ? 0.7 : 1,
             }}
           >
-            {loadingOrders ? "Loading..." : "Load database orders"}
+            {loadingOrders ? "Caricamento..." : "Carica ordini dal database"}
           </button>
         </div>
 
@@ -556,32 +561,32 @@ export default function AdminPage() {
             >
               {[
                 {
-                  label: "Today's Revenue",
+                  label: "Incasso di oggi",
                   value: formatPrice(totalRevenue),
                   icon: <TrendingUp size={20} />,
                   color: "#D4A843",
-                  sub: "From delivered orders",
+                  sub: "Dagli ordini consegnati",
                 },
                 {
-                  label: "Active Orders",
+                  label: "Ordini attivi",
                   value: activeOrders,
                   icon: <ShoppingBag size={20} />,
                   color: "#E8541A",
-                  sub: `${pendingOrders} pending action`,
+                  sub: `${pendingOrders} in attesa di un’azione`,
                 },
                 {
-                  label: "Today's Reservations",
+                  label: "Prenotazioni di oggi",
                   value: todayReservations,
                   icon: <Calendar size={20} />,
                   color: "#60A5FA",
-                  sub: `${reservations.filter((r) => r.status === "pending").length} awaiting confirm`,
+                  sub: `${reservations.filter((r) => r.status === "pending").length} in attesa di conferma`,
                 },
                 {
-                  label: "Total Customers",
+                  label: "Clienti totali",
                   value: orders.length,
                   icon: <Users size={20} />,
                   color: "#34D399",
-                  sub: "Today's unique orders",
+                  sub: "Ordini distinti di oggi",
                 },
               ].map((stat) => (
                 <div
@@ -661,7 +666,7 @@ export default function AdminPage() {
                       color: "#F5EDD8",
                     }}
                   >
-                    Recent Orders
+                    Ordini recenti
                   </h3>
                   <button
                     onClick={() => setTab("orders")}
@@ -674,7 +679,7 @@ export default function AdminPage() {
                       fontWeight: 600,
                     }}
                   >
-                    View All
+                    Vedi tutti
                   </button>
                 </div>
                 <div
@@ -772,7 +777,7 @@ export default function AdminPage() {
                     marginBottom: "20px",
                   }}
                 >
-                  Popular Today
+                  Più popolari oggi
                 </h3>
                 <div
                   style={{
@@ -782,10 +787,10 @@ export default function AdminPage() {
                   }}
                 >
                   {[
-                    { name: "Ember Jollof Rice", count: 24, pct: 90 },
-                    { name: "Suya Skewers", count: 19, pct: 72 },
-                    { name: "T-Bone Steak", count: 14, pct: 52 },
-                    { name: "Peppered Snail", count: 11, pct: 42 },
+                    { name: "Riso jollof alla brace", count: 24, pct: 90 },
+                    { name: "Spiedini di suya", count: 19, pct: 72 },
+                    { name: "Bistecca T-bone", count: 14, pct: 52 },
+                    { name: "Lumache piccanti", count: 11, pct: 42 },
                     { name: "Chapman", count: 31, pct: 100 },
                   ].map((item) => (
                     <div key={item.name}>
@@ -800,7 +805,7 @@ export default function AdminPage() {
                           {item.name}
                         </span>
                         <span style={{ fontSize: "12px", color: "#8A7566" }}>
-                          {item.count} orders
+                          {item.count} ordini
                         </span>
                       </div>
                       <div
@@ -845,10 +850,15 @@ export default function AdminPage() {
                 className="font-display"
                 style={{ fontSize: "28px", fontWeight: 700, color: "#F5EDD8" }}
               >
-                All Orders
+                Tutti gli ordini
               </h2>
               <div style={{ display: "flex", gap: "8px" }}>
-                {["all", "pending", "preparing", "delivered"].map((f) => (
+                {[
+                  ["all", "Tutti"],
+                  ["pending", "In attesa"],
+                  ["preparing", "In preparazione"],
+                  ["delivered", "Consegnati"],
+                ].map(([f, label]) => (
                   <button
                     key={f}
                     style={{
@@ -863,7 +873,7 @@ export default function AdminPage() {
                       textTransform: "capitalize",
                     }}
                   >
-                    {f}
+                    {label}
                   </button>
                 ))}
               </div>
@@ -873,8 +883,8 @@ export default function AdminPage() {
             >
               {orders.length === 0 && (
                 <p style={{ color: "#8A7566" }}>
-                  No database orders loaded yet. Enter the admin API key above
-                  and load orders.
+                  Non hai ancora caricato ordini dal database. Inserisci qui
+                  sopra la chiave API admin e carica gli ordini.
                 </p>
               )}
               {orders.map((order) => {
@@ -929,7 +939,7 @@ export default function AdminPage() {
                             className="badge"
                             style={{ background: "#3D3028", color: "#8A7566" }}
                           >
-                            {order.type}
+                            {ORDER_TYPE_LABELS[order.type] ?? order.type}
                           </span>
                         </div>
                         <p
@@ -952,7 +962,7 @@ export default function AdminPage() {
                             marginTop: "4px",
                           }}
                         >
-                          {new Date(order.time).toLocaleString()}
+                          {new Date(order.time).toLocaleString("it-IT")}
                         </p>
                       </div>
                       <div style={{ textAlign: "right" }}>
@@ -991,7 +1001,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Confirm
+                              Conferma
                             </button>
                           )}
                           {order.status === "confirmed" && (
@@ -1010,7 +1020,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Start Preparing
+                              Avvia preparazione
                             </button>
                           )}
                           {order.status === "preparing" && (
@@ -1029,7 +1039,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Mark Ready
+                              Segna come pronto
                             </button>
                           )}
                           {order.status === "ready" && (
@@ -1048,7 +1058,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Dispatched
+                              Affidato al corriere
                             </button>
                           )}
                           {order.status === "out-for-delivery" && (
@@ -1067,7 +1077,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Delivered ✓
+                              Consegnato ✓
                             </button>
                           )}
                           {!["delivered", "cancelled"].includes(
@@ -1088,7 +1098,7 @@ export default function AdminPage() {
                                 cursor: "pointer",
                               }}
                             >
-                              Cancel
+                              Annulla
                             </button>
                           )}
                         </div>
@@ -1116,7 +1126,7 @@ export default function AdminPage() {
                         📞 {order.phone}
                       </a>
                       <a
-                        href={`https://wa.me/${order.phone.replace(/[\s\+]/g, "")}?text=${encodeURIComponent(`Hi ${order.customer}! Your order ${order.id} status: ${STATUS_CONFIG[order.status]?.label}`)}`}
+                        href={`https://wa.me/${order.phone.replace(/[\s\+]/g, "")}?text=${encodeURIComponent(`Ciao ${order.customer}! Lo stato del tuo ordine ${order.id} è: ${STATUS_CONFIG[order.status]?.label}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -1128,7 +1138,7 @@ export default function AdminPage() {
                           gap: "4px",
                         }}
                       >
-                        💬 WhatsApp customer
+                        💬 Scrivi al cliente su WhatsApp
                       </a>
                     </div>
                   </div>
@@ -1150,7 +1160,7 @@ export default function AdminPage() {
                 marginBottom: "24px",
               }}
             >
-              Reservations
+              Prenotazioni
             </h2>
             <div
               style={{ display: "flex", flexDirection: "column", gap: "12px" }}
@@ -1206,7 +1216,7 @@ export default function AdminPage() {
                                 : "#D4A843",
                           }}
                         >
-                          {res.status}
+                          {res.status === "confirmed" ? "Confermata" : "In attesa"}
                         </span>
                       </div>
                       <p
@@ -1257,7 +1267,7 @@ export default function AdminPage() {
                             gap: "4px",
                           }}
                         >
-                          <Users size={13} /> {res.guests} guests
+                          <Users size={13} /> {res.guests} ospiti
                         </span>
                       </div>
                       {res.requests && (
@@ -1295,7 +1305,7 @@ export default function AdminPage() {
                             gap: "6px",
                           }}
                         >
-                          <CheckCircle size={14} /> Confirm
+                          <CheckCircle size={14} /> Conferma
                         </button>
                       )}
                       {res.status !== "cancelled" && (
@@ -1317,7 +1327,7 @@ export default function AdminPage() {
                             gap: "6px",
                           }}
                         >
-                          <XCircle size={14} /> Cancel
+                          <XCircle size={14} /> Annulla
                         </button>
                       )}
                     </div>
@@ -1345,11 +1355,11 @@ export default function AdminPage() {
                 className="font-display"
                 style={{ fontSize: "28px", fontWeight: 700, color: "#F5EDD8" }}
               >
-                Menu Items
+                Piatti del menu
               </h2>
               <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                {MENU_ITEMS.length} total items ·{" "}
-                {MENU_ITEMS.filter((i) => i.available).length} available
+                {MENU_ITEMS.length} piatti in totale ·{" "}
+                {MENU_ITEMS.filter((i) => i.available).length} disponibili
               </p>
             </div>
             <div
@@ -1404,7 +1414,7 @@ export default function AdminPage() {
                         textTransform: "capitalize",
                       }}
                     >
-                      {item.category}
+                      {CATEGORIES.find((category) => category.id === item.category)?.label ?? item.category}
                     </p>
                     <p
                       style={{
@@ -1433,7 +1443,7 @@ export default function AdminPage() {
                         color: item.available ? "#34D399" : "#F87171",
                       }}
                     >
-                      {item.available ? "Live" : "Off"}
+                      {item.available ? "Disponibile" : "Non disponibile"}
                     </span>
                   </div>
                 </div>

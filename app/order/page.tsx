@@ -90,8 +90,8 @@ export default function OrderPage() {
     const hasAccount = hasAccounts();
     toast.error(
       hasAccount
-        ? "Please log in with your email and password first"
-        : "Please sign up first before using WhatsApp",
+        ? "Accedi prima con la tua email e la tua password"
+        : "Crea un account prima di usare WhatsApp",
     );
     router.push("/auth?next=/order");
     return false;
@@ -99,29 +99,29 @@ export default function OrderPage() {
 
   const handlePlaceOrder = async () => {
     if (isRestaurantClosed) {
-      toast.error("We're closed for the day. Please try again tomorrow.");
+      toast.error("Per oggi siamo chiusi. Riprova domani.");
       return;
     }
 
     // Validate payment details based on method
     if (paymentMethod === "card") {
       if (!paymentDetails.cardholderName.trim()) {
-        toast.error("Please enter cardholder name");
+        toast.error("Inserisci il nome del titolare della carta");
         return;
       }
       if (
         !paymentDetails.cardNumber.trim() ||
         paymentDetails.cardNumber.length < 13
       ) {
-        toast.error("Please enter a valid card number");
+        toast.error("Inserisci un numero di carta valido");
         return;
       }
       if (!paymentDetails.expiry.trim() || paymentDetails.expiry.length < 5) {
-        toast.error("Please enter expiry date (MM/YY)");
+        toast.error("Inserisci la data di scadenza (MM/AA)");
         return;
       }
       if (!paymentDetails.cvv.trim() || paymentDetails.cvv.length < 3) {
-        toast.error("Please enter a valid CVV");
+        toast.error("Inserisci un CVV valido");
         return;
       }
     }
@@ -144,18 +144,18 @@ export default function OrderPage() {
       });
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "The order could not be saved.");
+        throw new Error(result.error || "Non è stato possibile salvare l’ordine.");
       }
 
       setOrderId(result.id);
       setStep("confirm");
       clearCart();
-      toast.success("Order saved successfully! 🔥");
+      toast.success("Ordine salvato correttamente! 🔥");
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "The order could not be saved. Please try again.",
+          : "Non è stato possibile salvare l’ordine. Riprova.",
       );
     } finally {
       setLoading(false);
@@ -210,16 +210,16 @@ export default function OrderPage() {
               marginBottom: "12px",
             }}
           >
-            Order Confirmed!
+            Ordine confermato!
           </h1>
           <p
             style={{ color: "#8A7566", marginBottom: "8px", fontSize: "15px" }}
           >
-            Your order{" "}
+            Il tuo ordine{" "}
             <span style={{ color: "#E8541A", fontWeight: 700 }}>
               #{orderId}
             </span>{" "}
-            has been received.
+            è stato ricevuto.
           </p>
           <p
             style={{
@@ -229,8 +229,8 @@ export default function OrderPage() {
               lineHeight: "1.6",
             }}
           >
-            We&apos;re firing up the kitchen. Estimated time:{" "}
-            <strong style={{ color: "#F5EDD8" }}>30–45 minutes</strong>
+            Stiamo preparando la cucina. Tempo stimato:{" "}
+            <strong style={{ color: "#F5EDD8" }}>30–45 minuti</strong>
           </p>
           <div
             style={{
@@ -252,7 +252,7 @@ export default function OrderPage() {
                   gap: "8px",
                 }}
               >
-                <Truck size={16} /> Track Order
+                <Truck size={16} /> Traccia l’ordine
               </button>
             </Link>
             <Link href="/menu" style={{ textDecoration: "none" }}>
@@ -264,7 +264,7 @@ export default function OrderPage() {
                   fontSize: "14px",
                 }}
               >
-                Back to Menu
+                Torna al menu
               </button>
             </Link>
           </div>
@@ -285,13 +285,13 @@ export default function OrderPage() {
         {/* Header */}
         <div style={{ marginBottom: "32px" }}>
           <p className="section-label" style={{ marginBottom: "8px" }}>
-            Checkout
+            Completa l’ordine
           </p>
           <h1
             className="font-display order-title"
             style={{ fontSize: "40px", fontWeight: 800, color: "#F5EDD8" }}
           >
-            Your Order
+            Il tuo ordine
           </h1>
         </div>
 
@@ -302,10 +302,10 @@ export default function OrderPage() {
         >
           {(["cart", "details", "payment"] as Step[]).map((s, i) => {
             const labels: Record<Step, string> = {
-              cart: "Cart",
-              details: "Details",
-              payment: "Payment",
-              confirm: "Confirm",
+              cart: "Carrello",
+              details: "Dati",
+              payment: "Pagamento",
+              confirm: "Conferma",
             };
             const stepIndex = ["cart", "details", "payment"].indexOf(step);
             const thisIndex = i;
@@ -402,7 +402,7 @@ export default function OrderPage() {
                       className="font-display"
                       style={{ fontSize: "22px", marginBottom: "8px" }}
                     >
-                      Your cart is empty
+                      Il carrello è vuoto
                     </p>
                     <Link href="/menu" style={{ textDecoration: "none" }}>
                       <button
@@ -414,7 +414,7 @@ export default function OrderPage() {
                           fontSize: "14px",
                         }}
                       >
-                        Browse Menu
+                        Sfoglia il menu
                       </button>
                     </Link>
                   </div>
@@ -435,7 +435,7 @@ export default function OrderPage() {
                           textTransform: "uppercase",
                         }}
                       >
-                        Order Type
+                        Tipo di ordine
                       </p>
                       <div
                         className="order-type-options"
@@ -449,17 +449,17 @@ export default function OrderPage() {
                           [
                             {
                               val: "delivery",
-                              label: "Delivery",
+                              label: "Consegna a domicilio",
                               icon: <Truck size={16} />,
                             },
                             {
                               val: "pickup",
-                              label: "Pickup",
+                              label: "Ritiro",
                               icon: <MapPin size={16} />,
                             },
                             {
                               val: "dine-in",
-                              label: "Dine-In",
+                              label: "Consumo al ristorante",
                               icon: <ShoppingBag size={16} />,
                             },
                           ] as {
@@ -512,7 +512,7 @@ export default function OrderPage() {
                           textTransform: "uppercase",
                         }}
                       >
-                        Items ({items.length})
+                        Articoli ({items.length})
                       </p>
                       <div
                         style={{
@@ -673,12 +673,12 @@ export default function OrderPage() {
                           gap: "8px",
                         }}
                       >
-                        <MessageCircle size={16} /> Order on WhatsApp
+                        <MessageCircle size={16} /> Ordina su WhatsApp
                       </button>
                       <button
                         onClick={() => {
                           if (!isAuthenticated) {
-                            toast.error("Please sign in before checkout");
+                            toast.error("Accedi prima di completare l’ordine");
                             router.push("/auth?next=/order");
                             return;
                           }
@@ -699,7 +699,7 @@ export default function OrderPage() {
                           fontSize: "14px",
                         }}
                       >
-                        Continue →
+                        Continua →
                       </button>
                     </div>
                   </div>
@@ -719,7 +719,7 @@ export default function OrderPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Your Details
+                  I tuoi dati
                 </p>
                 <div
                   style={{
@@ -747,11 +747,11 @@ export default function OrderPage() {
                           textTransform: "uppercase",
                         }}
                       >
-                        Full Name *
+                        Nome e cognome *
                       </label>
                       <input
                         className="input-field"
-                        placeholder="Your name"
+                        placeholder="Il tuo nome"
                         value={customer.name}
                         onChange={(e) =>
                           setCustomer({ ...customer, name: e.target.value })
@@ -773,7 +773,7 @@ export default function OrderPage() {
                       </label>
                       <input
                         className="input-field"
-                        placeholder="+234..."
+                        placeholder="+39..."
                         type="tel"
                         value={customer.phone}
                         onChange={(e) =>
@@ -797,7 +797,7 @@ export default function OrderPage() {
                     </label>
                     <input
                       className="input-field"
-                      placeholder="you@email.com"
+                      placeholder="tu@email.it"
                       type="email"
                       value={customer.email}
                       onChange={(e) =>
@@ -817,11 +817,11 @@ export default function OrderPage() {
                           textTransform: "uppercase",
                         }}
                       >
-                        Delivery Address *
+                        Indirizzo di consegna *
                       </label>
                       <textarea
                         className="input-field"
-                        placeholder="Full address including area"
+                        placeholder="Indirizzo completo, incluso il comune"
                         rows={3}
                         value={customer.address}
                         onChange={(e) =>
@@ -845,16 +845,16 @@ export default function OrderPage() {
                       fontSize: "14px",
                     }}
                   >
-                    ← Back
+                    ← Indietro
                   </button>
                   <button
                     onClick={() => {
                       if (!customer.name || !customer.phone) {
-                        toast.error("Please fill in required fields");
+                        toast.error("Compila i campi obbligatori");
                         return;
                       }
                       if (orderType === "delivery" && !customer.address) {
-                        toast.error("Please add your delivery address");
+                        toast.error("Inserisci l’indirizzo di consegna");
                         return;
                       }
                       setStep("payment");
@@ -866,7 +866,7 @@ export default function OrderPage() {
                       fontSize: "14px",
                     }}
                   >
-                    Continue →
+                    Continua →
                   </button>
                 </div>
               </div>
@@ -884,7 +884,7 @@ export default function OrderPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Payment Method
+                  Metodo di pagamento
                 </p>
                 <div
                   style={{
@@ -898,20 +898,20 @@ export default function OrderPage() {
                     [
                       {
                         val: "card",
-                        label: "Debit / Credit Card",
+                        label: "Carta di debito o credito",
                         sub: "Visa, Mastercard, Verve",
                         icon: <CreditCard size={20} />,
                       },
                       {
                         val: "transfer",
-                        label: "Bank Transfer",
+                        label: "Bonifico bancario",
                         sub: "GTBank, Access, UBA",
                         icon: <Banknote size={20} />,
                       },
                       {
                         val: "cash",
-                        label: "Pay on Delivery",
-                        sub: "Cash on arrival",
+                        label: "Pagamento alla consegna",
+                        sub: "Contanti alla consegna",
                         icon: <Banknote size={20} />,
                       },
                     ] as {
@@ -1004,11 +1004,11 @@ export default function OrderPage() {
                           fontWeight: 600,
                         }}
                       >
-                        Cardholder Name
+                        Nome del titolare
                       </label>
                       <input
                         type="text"
-                        placeholder="John Doe"
+                        placeholder="Mario Rossi"
                         value={paymentDetails.cardholderName}
                         onChange={(e) =>
                           setPaymentDetails({
@@ -1038,7 +1038,7 @@ export default function OrderPage() {
                           fontWeight: 600,
                         }}
                       >
-                        Card Number
+                        Numero della carta
                       </label>
                       <input
                         type="text"
@@ -1082,7 +1082,7 @@ export default function OrderPage() {
                             fontWeight: 600,
                           }}
                         >
-                          Expiry (MM/YY)
+                          Scadenza (MM/AA)
                         </label>
                         <input
                           type="text"
@@ -1165,7 +1165,7 @@ export default function OrderPage() {
                         marginBottom: "16px",
                       }}
                     >
-                      Bank Details
+                      Coordinate bancarie
                     </p>
                     <div
                       style={{
@@ -1182,7 +1182,7 @@ export default function OrderPage() {
                             marginBottom: "4px",
                           }}
                         >
-                          Bank Name
+                          Nome della banca
                         </p>
                         <p
                           style={{
@@ -1202,7 +1202,7 @@ export default function OrderPage() {
                             marginBottom: "4px",
                           }}
                         >
-                          Account Number
+                          Numero di conto
                         </p>
                         <p
                           style={{
@@ -1223,7 +1223,7 @@ export default function OrderPage() {
                             marginBottom: "4px",
                           }}
                         >
-                          Account Name
+                          Intestatario del conto
                         </p>
                         <p
                           style={{
@@ -1232,7 +1232,7 @@ export default function OrderPage() {
                             color: "#F5EDD8",
                           }}
                         >
-                          Ember & Ash Restaurants
+                          I Ragazzi del Sole
                         </p>
                       </div>
                       <div>
@@ -1243,7 +1243,7 @@ export default function OrderPage() {
                             marginBottom: "4px",
                           }}
                         >
-                          Amount
+                          Importo
                         </p>
                         <p
                           style={{
@@ -1264,8 +1264,8 @@ export default function OrderPage() {
                         lineHeight: "1.5",
                       }}
                     >
-                      ℹ️ After completing your transfer, you&apos;ll need to confirm
-                      your order. Keep your transaction reference handy.
+                      ℹ️ Dopo aver effettuato il bonifico, conferma l’ordine.
+                      Tieni a portata di mano la ricevuta della transazione.
                     </p>
                   </div>
                 )}
@@ -1288,7 +1288,7 @@ export default function OrderPage() {
                         marginBottom: "4px",
                       }}
                     >
-                      We&apos;re closed for the day
+                      Per oggi siamo chiusi
                     </p>
                     <p
                       style={{
@@ -1297,8 +1297,8 @@ export default function OrderPage() {
                         lineHeight: "1.5",
                       }}
                     >
-                      Please come back during opening hours and we&apos;ll take
-                      care of your order.
+                      Torna durante gli orari di apertura: saremo felici di
+                      occuparci del tuo ordine.
                     </p>
                   </div>
                 )}
@@ -1316,7 +1316,7 @@ export default function OrderPage() {
                       fontSize: "14px",
                     }}
                   >
-                    ← Back
+                    ← Indietro
                   </button>
                   <button
                     onClick={handlePlaceOrder}
@@ -1332,7 +1332,7 @@ export default function OrderPage() {
                         isRestaurantClosed || loading ? "not-allowed" : "pointer",
                     }}
                   >
-                    {loading ? "Saving order..." : "Place Order"}
+                    {loading ? "Salvataggio dell’ordine..." : "Invia l’ordine"}
                   </button>
                 </div>
               </div>
@@ -1355,7 +1355,7 @@ export default function OrderPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Order Summary
+                Riepilogo ordine
               </p>
               <div
                 style={{
@@ -1388,7 +1388,7 @@ export default function OrderPage() {
                 }}
               >
                 <span style={{ fontSize: "13px", color: "#8A7566" }}>
-                  Subtotal
+                  Subtotale
                 </span>
                 <span style={{ fontSize: "13px", color: "#F5EDD8" }}>
                   {formatPrice(sub)}
@@ -1402,7 +1402,7 @@ export default function OrderPage() {
                 }}
               >
                 <span style={{ fontSize: "13px", color: "#8A7566" }}>
-                  Delivery {orderType !== "delivery" && "(N/A)"}
+                  Consegna {orderType !== "delivery" && "(non disponibile)"}
                 </span>
                 <span
                   style={{
@@ -1413,13 +1413,13 @@ export default function OrderPage() {
                   {orderType !== "delivery"
                     ? "—"
                     : deliveryFee === 0
-                      ? "Free"
+                      ? "Gratuita"
                       : formatPrice(deliveryFee)}
                 </span>
               </div>
               <div className="divider" style={{ marginBottom: "12px" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontWeight: 700, color: "#F5EDD8" }}>Total</span>
+                <span style={{ fontWeight: 700, color: "#F5EDD8" }}>Totale</span>
                 <span
                   style={{
                     fontWeight: 700,
@@ -1447,10 +1447,10 @@ export default function OrderPage() {
                     lineHeight: "1.6",
                   }}
                 >
-                  🕒 Estimated time:{" "}
-                  <span style={{ color: "#F5EDD8" }}>30–45 min</span> for
-                  delivery, <span style={{ color: "#F5EDD8" }}>15–20 min</span>{" "}
-                  for pickup
+                  🕒 Tempo stimato:{" "}
+                  <span style={{ color: "#F5EDD8" }}>30–45 min</span> per la
+                  consegna, <span style={{ color: "#F5EDD8" }}>15–20 min</span>{" "}
+                  per il ritiro
                 </p>
               </div>
             </div>

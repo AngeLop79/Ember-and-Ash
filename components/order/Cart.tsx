@@ -55,7 +55,7 @@ export default function Cart() {
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <ShoppingBag size={20} color="#E8541A" />
             <span className="font-display" style={{ fontSize: "20px", fontWeight: 700, color: "#F5EDD8" }}>
-              Your Order
+              Il tuo ordine
             </span>
             {count > 0 && (
               <span style={{
@@ -74,14 +74,14 @@ export default function Cart() {
           {items.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: "#8A7566" }}>
               <ShoppingBag size={48} style={{ margin: "0 auto 16px", opacity: 0.3, display: "block" }} />
-              <p style={{ fontFamily: "var(--font-display)", fontSize: "18px", marginBottom: "8px" }}>Your cart is empty</p>
-              <p style={{ fontSize: "14px" }}>Add some fire-crafted dishes</p>
+              <p style={{ fontFamily: "var(--font-display)", fontSize: "18px", marginBottom: "8px" }}>Il carrello è vuoto</p>
+              <p style={{ fontSize: "14px" }}>Aggiungi qualche piatto alla brace</p>
               <button
                 onClick={closeCart}
                 className="btn-ember"
                 style={{ marginTop: "24px", padding: "10px 24px", borderRadius: "8px", fontSize: "14px" }}
               >
-                Browse Menu
+                Sfoglia il menu
               </button>
             </div>
           ) : (
@@ -151,17 +151,17 @@ export default function Cart() {
           <div style={{ padding: "20px 24px", borderTop: "1px solid #3D3028" }}>
             <div style={{ marginBottom: "16px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                <span style={{ fontSize: "13px", color: "#8A7566" }}>Subtotal</span>
+                <span style={{ fontSize: "13px", color: "#8A7566" }}>Subtotale</span>
                 <span style={{ fontSize: "13px", color: "#F5EDD8" }}>{formatPrice(sub)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                <span style={{ fontSize: "13px", color: "#8A7566" }}>Delivery</span>
+                <span style={{ fontSize: "13px", color: "#8A7566" }}>Consegna</span>
                 <span style={{ fontSize: "13px", color: deliveryFee === 0 ? "#D4A843" : "#F5EDD8" }}>
-                  {deliveryFee === 0 ? "Free" : formatPrice(deliveryFee)}
+                  {deliveryFee === 0 ? "Gratuita" : formatPrice(deliveryFee)}
                 </span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "12px", borderTop: "1px solid #3D3028" }}>
-                <span style={{ fontWeight: 700, fontSize: "16px", color: "#F5EDD8" }}>Total</span>
+                <span style={{ fontWeight: 700, fontSize: "16px", color: "#F5EDD8" }}>Totale</span>
                 <span style={{ fontWeight: 700, fontSize: "18px", color: "#E8541A" }}>{formatPrice(total)}</span>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function Cart() {
                 width: "100%", padding: "14px", borderRadius: "10px",
                 fontSize: "15px", fontWeight: 600, marginBottom: "10px",
               }}>
-                Checkout — {formatPrice(total)}
+                Vai al pagamento — {formatPrice(total)}
               </button>
             </Link>
 
@@ -186,7 +186,7 @@ export default function Cart() {
               }}
             >
               <MessageCircle size={18} />
-              Order on WhatsApp
+              Ordina su WhatsApp
             </button>
           </div>
         )}
