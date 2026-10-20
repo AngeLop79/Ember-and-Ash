@@ -18,8 +18,8 @@ import { useEffect, useRef, useState } from "react";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/menu", label: "Menu" },
-  { href: "/order", label: "Order" },
-  { href: "/reservations", label: "Reserve" },
+  { href: "/order", label: "Ordini" },
+  { href: "/reservations", label: "Prenotazioni" },
   { href: "/tracking", label: "Track" },
 ];
 
@@ -115,7 +115,7 @@ export default function Navbar() {
                 letterSpacing: "0.01em",
               }}
             >
-              Ember & Ash
+              I ragazzi del sole
             </span>
           </Link>
 

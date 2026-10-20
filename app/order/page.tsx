@@ -7,7 +7,6 @@ import { useAuthStore } from "@/store/authStore";
 import { hasAccounts } from "@/lib/demoAuth";
 import {
   formatPrice,
-  generateOrderId,
   buildWhatsAppOrderMessage,
   getWhatsAppUrl,
   calculateDeliveryFee,
@@ -47,11 +46,7 @@ export default function OrderPage() {
     email: "",
     address: "",
   });
-  // Generate order ID on the client to avoid server/client hydration mismatch
   const [orderId, setOrderId] = useState("");
-  useEffect(() => {
-    setOrderId(generateOrderId());
-  }, []);
   const [loading, setLoading] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const [paymentDetails, setPaymentDetails] = useState({
@@ -132,11 +127,39 @@ export default function OrderPage() {
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    setStep("confirm");
-    clearCart();
-    toast.success("Order placed successfully! 🔥");
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map(({ id, quantity, notes }) => ({
+            id,
+            quantity,
+            notes,
+          })),
+          customer,
+          type: orderType,
+          paymentMethod,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "The order could not be saved.");
+      }
+
+      setOrderId(result.id);
+      setStep("confirm");
+      clearCart();
+      toast.success("Order saved successfully! 🔥");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "The order could not be saved. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWhatsApp = () => {
@@ -1241,7 +1264,7 @@ export default function OrderPage() {
                         lineHeight: "1.5",
                       }}
                     >
-                      ℹ️ After completing your transfer, you'll need to confirm
+                      ℹ️ After completing your transfer, you&apos;ll need to confirm
                       your order. Keep your transaction reference handy.
                     </p>
                   </div>
@@ -1297,18 +1320,19 @@ export default function OrderPage() {
                   </button>
                   <button
                     onClick={handlePlaceOrder}
-                    disabled={isRestaurantClosed}
+                    disabled={isRestaurantClosed || loading}
                     className="btn-ember"
                     style={{
                       padding: "12px 32px",
                       borderRadius: "10px",
                       fontSize: "14px",
                       flex: 1,
-                      opacity: isRestaurantClosed ? 0.6 : 1,
-                      cursor: isRestaurantClosed ? "not-allowed" : "pointer",
+                      opacity: isRestaurantClosed || loading ? 0.6 : 1,
+                      cursor:
+                        isRestaurantClosed || loading ? "not-allowed" : "pointer",
                     }}
                   >
-                    Place Order
+                    {loading ? "Saving order..." : "Place Order"}
                   </button>
                 </div>
               </div>

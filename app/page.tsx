@@ -96,7 +96,7 @@ export default function HomePage() {
           }}
         >
           <p className="section-label " style={{marginTop: "13px", marginBottom: "24px" }}>
-            🔥 Now accepting orders
+            🔥 Ordinazione aperte
           </p>
           <h1
             className="font-display mobile-title"
@@ -108,7 +108,7 @@ export default function HomePage() {
               marginBottom: "4px",
             }}
           >
-            Fire-crafted
+            XIII° Sagra del Maiale
           </h1>
           <h1
             className="font-display mobile-title"
@@ -121,7 +121,7 @@ export default function HomePage() {
               fontStyle: "italic",
             }}
           >
-            Flavours.
+            I sapori della tradizione
           </h1>
           <p
             className="mobile-subtitle"
@@ -133,8 +133,8 @@ export default function HomePage() {
               marginBottom: "48px",
             }}
           >
-            Rooted in West African tradition. Perfected over open flame.
-            Delivered to your door or served at your table.
+            La tradizione calabrese, il gusto della cucina contadina e il profumo del maiale alla brace.  e tradizione, nel cuore della nostra comunità.
+            Una festa di sapori autentici, convivialità
           </p>
           <div
             className="mobile-stack mobile-small-gap"

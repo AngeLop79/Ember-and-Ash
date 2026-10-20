@@ -1,7 +1,7 @@
 import { MenuItem } from "@/types";
 
 export const RESTAURANT_INFO = {
-  name: "Ember & Ash",
+  name: "I ragazzi del sole",
   tagline: "Fire-crafted flavours, rooted in tradition",
   phone: "+2347065968213",
   whatsapp: "+2347065968213",

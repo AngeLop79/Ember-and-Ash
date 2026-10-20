@@ -18,27 +18,36 @@ import { useAuthStore } from "@/store/authStore";
 import { hasAccounts } from "@/lib/demoAuth";
 import toast from "react-hot-toast";
 
-const ORDERS: Record<
-  string,
-  { status: number; items: string; type: string; eta: string }
-> = {
+type TrackingOrder = {
+  status: number;
+  items: string;
+  type: string;
+  eta: string;
+  demo?: boolean;
+  cancelled?: boolean;
+};
+
+const ORDERS: Record<string, TrackingOrder> = {
   "EA-DEMO1": {
     status: 2,
     items: "Ember Jollof Rice × 2, Fried Plantain × 1",
     type: "Delivery",
     eta: "~20 mins",
+    demo: true,
   },
   "EA-DEMO2": {
     status: 4,
     items: "T-Bone Steak × 1, Chapman × 2",
     type: "Delivery",
     eta: "~5 mins",
+    demo: true,
   },
   "EA-DEMO3": {
     status: 3,
     items: "Suya Skewers × 3, Zobo Royale × 2",
     type: "Pickup",
     eta: "Ready!",
+    demo: true,
   },
 };
 
@@ -86,14 +95,13 @@ export default function TrackingPage() {
   const { isAuthenticated } = useAuthStore();
   const [orderId, setOrderId] = useState("");
   const [searched, setSearched] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [orderData, setOrderData] = useState<(typeof ORDERS)[string] | null>(
-    null,
-  );
+  const [orderData, setOrderData] = useState<TrackingOrder | null>(null);
 
   // Auto-progress demo
   useEffect(() => {
-    if (!orderData) return;
+    if (!orderData?.demo) return;
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
         if (prev < STEPS.length - 1) {
@@ -106,7 +114,7 @@ export default function TrackingPage() {
     return () => clearInterval(interval);
   }, [orderData]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const id = orderId.trim().toUpperCase();
     if (!id) {
       toast.error("Enter an order ID");
@@ -122,20 +130,32 @@ export default function TrackingPage() {
       return;
     }
 
-    // Accept any EA- format as a new order
-    if (id.startsWith("EA-") || id.startsWith("RES-")) {
-      setOrderData({
-        status: 0,
-        items: "Your order items",
-        type: "Delivery",
-        eta: "~35 mins",
-      });
-      setCurrentStep(0);
-      setSearched(true);
-      return;
-    }
+    setSearching(true);
+    try {
+      const response = await fetch(`/api/orders/${encodeURIComponent(id)}`);
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Order not found.");
+      }
 
-    toast.error("Order not found. Try EA-001 to see a live tracking example.");
+      setOrderData({
+        status: result.statusStep,
+        items: result.items,
+        type: result.type,
+        eta: result.eta,
+        cancelled: result.status === "cancelled",
+      });
+      setCurrentStep(result.statusStep);
+      setSearched(true);
+    } catch (error) {
+      setOrderData(null);
+      setSearched(false);
+      toast.error(
+        error instanceof Error ? error.message : "Could not look up this order.",
+      );
+    } finally {
+      setSearching(false);
+    }
   };
 
   const progress = Math.round((currentStep / (STEPS.length - 1)) * 100);
@@ -188,10 +208,10 @@ export default function TrackingPage() {
               marginBottom: "12px",
             }}
           >
-            Track Your Order (Demo)
+            Track Your Order
           </h1>
           <p style={{ color: "#8A7566", marginBottom: "32px" }}>
-            Enter your order ID below. Try{" "}
+            Enter your order ID below, or try the demo orders{" "}
             <span
               style={{ color: "#E8541A", cursor: "pointer", fontWeight: 600 }}
               onClick={() => {
@@ -223,6 +243,7 @@ export default function TrackingPage() {
             />
             <button
               onClick={handleSearch}
+              disabled={searching}
               className="btn-ember tracking-search-button"
               style={{
                 padding: "12px 24px",
@@ -235,7 +256,7 @@ export default function TrackingPage() {
                 whiteSpace: "nowrap",
               }}
             >
-              <Search size={16} /> Track
+              <Search size={16} /> {searching ? "Searching..." : "Track"}
             </button>
           </div>
         </div>
@@ -393,7 +414,9 @@ export default function TrackingPage() {
                         marginRight: "6px",
                       }}
                     />
-                    {STEPS[currentStep].label}
+                    {orderData?.cancelled
+                      ? "Cancelled"
+                      : STEPS[currentStep].label}
                   </span>
                   {orderData && (
                     <p

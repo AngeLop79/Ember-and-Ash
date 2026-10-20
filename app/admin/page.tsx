@@ -10,82 +10,37 @@ import {
   Users,
   Clock,
   ChefHat,
-  Truck,
   CheckCircle,
   XCircle,
-  Eye,
   Bell,
-  BarChart2,
   Flame,
 } from "lucide-react";
-import { MENU_ITEMS, RESTAURANT_INFO } from "@/lib/data";
+import { MENU_ITEMS } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
+import toast from "react-hot-toast";
 
 type AdminTab = "overview" | "orders" | "reservations" | "menu";
 
-const ORDERS = [
-  {
-    id: "EA-K9X2-MN1P",
-    customer: "Chiamaka Obi",
-    items: "Ember Jollof Rice ×2, Suya Skewers ×1",
-    total: 12100,
-    type: "Delivery",
-    status: "preparing",
-    time: "12 mins ago",
-    phone: "+234 801 234 5678",
-  },
-  {
-    id: "EA-L8W3-AB2Q",
-    customer: "Emeka Nwosu",
-    items: "T-Bone Steak ×1, Chapman ×2",
-    total: 22100,
-    type: "Dine-In",
-    status: "confirmed",
-    time: "25 mins ago",
-    phone: "+234 802 345 6789",
-  },
-  {
-    id: "EA-M7V4-CD3R",
-    customer: "Tunde Adeyemi",
-    items: "Peppered Snail ×2, Pounded Yam ×1",
-    total: 10200,
-    type: "Pickup",
-    status: "ready",
-    time: "32 mins ago",
-    phone: "+234 803 456 7890",
-  },
-  {
-    id: "EA-N6U5-EF4S",
-    customer: "Ngozi Eze",
-    items: "Egusi Soup ×1, Eba ×1, Zobo Royale ×2",
-    total: 9300,
-    type: "Delivery",
-    status: "out-for-delivery",
-    time: "48 mins ago",
-    phone: "+234 804 567 8901",
-  },
-  {
-    id: "EA-O5T6-GH5T",
-    customer: "Babatunde Lagos",
-    items: "Asun ×1, Lamb Chops ×1",
-    total: 17500,
-    type: "Delivery",
-    status: "delivered",
-    time: "1 hr ago",
-    phone: "+234 805 678 9012",
-  },
-  {
-    id: "EA-P4S7-IJ6U",
-    customer: "Adaeze Umeh",
-    items: "Catfish Pepper Soup ×1, Lava Cake ×2",
-    total: 12100,
-    type: "Dine-In",
-    status: "pending",
-    time: "2 mins ago",
-    phone: "+234 806 789 0123",
-  },
-];
+type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "out-for-delivery"
+  | "delivered"
+  | "cancelled";
+
+type AdminOrder = {
+  id: string;
+  customer: string;
+  items: string;
+  total: number;
+  type: string;
+  status: OrderStatus;
+  time: string;
+  phone: string;
+};
 
 const RESERVATIONS = [
   {
@@ -162,8 +117,10 @@ const STATUS_CONFIG: Record<
 export default function AdminPage() {
   const { isAuthenticated } = useAuthStore();
   const [tab, setTab] = useState<AdminTab>("overview");
-  const [orders, setOrders] = useState(ORDERS);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [reservations, setReservations] = useState(RESERVATIONS);
+  const [adminApiKey, setAdminApiKey] = useState("");
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   const totalRevenue = orders
     .filter((o) => o.status === "delivered")
@@ -174,8 +131,62 @@ export default function AdminPage() {
     (o) => !["delivered", "cancelled"].includes(o.status),
   ).length;
 
-  const updateOrderStatus = (id: string, status: string) => {
-    setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
+  const loadOrders = async () => {
+    if (!adminApiKey.trim()) {
+      toast.error("Enter the admin API key from your server configuration.");
+      return;
+    }
+
+    setLoadingOrders(true);
+    try {
+      const response = await fetch("/api/admin/orders", {
+        headers: { Authorization: `Bearer ${adminApiKey}` },
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Could not load orders.");
+      }
+      setOrders(result.orders);
+      toast.success("Orders loaded from PostgreSQL.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not load orders.",
+      );
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const updateOrderStatus = async (id: string, status: OrderStatus) => {
+    try {
+      const response = await fetch(
+        `/api/admin/orders/${encodeURIComponent(id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${adminApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        },
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Could not update order status.");
+      }
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id ? { ...order, status: result.status } : order,
+        ),
+      );
+      toast.success("Order status updated.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not update order status.",
+      );
+    }
   };
 
   const updateReservationStatus = (id: string, status: string) => {
@@ -484,6 +495,51 @@ export default function AdminPage() {
               )}
             </button>
           ))}
+        </div>
+
+        <div
+          className="card"
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            gap: "12px",
+            flexWrap: "wrap",
+            marginBottom: "24px",
+            padding: "16px",
+          }}
+        >
+          <label style={{ flex: "1 1 280px" }}>
+            <span
+              style={{
+                display: "block",
+                color: "#8A7566",
+                fontSize: "12px",
+                marginBottom: "6px",
+              }}
+            >
+              Admin API key (configured in server .env)
+            </span>
+            <input
+              className="input-field"
+              type="password"
+              autoComplete="off"
+              value={adminApiKey}
+              onChange={(event) => setAdminApiKey(event.target.value)}
+              placeholder="Enter admin API key"
+            />
+          </label>
+          <button
+            onClick={loadOrders}
+            disabled={loadingOrders}
+            className="btn-ember"
+            style={{
+              padding: "12px 20px",
+              borderRadius: "8px",
+              opacity: loadingOrders ? 0.7 : 1,
+            }}
+          >
+            {loadingOrders ? "Loading..." : "Load database orders"}
+          </button>
         </div>
 
         {/* OVERVIEW TAB */}
@@ -815,6 +871,12 @@ export default function AdminPage() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "12px" }}
             >
+              {orders.length === 0 && (
+                <p style={{ color: "#8A7566" }}>
+                  No database orders loaded yet. Enter the admin API key above
+                  and load orders.
+                </p>
+              )}
               {orders.map((order) => {
                 const cfg =
                   STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
@@ -890,7 +952,7 @@ export default function AdminPage() {
                             marginTop: "4px",
                           }}
                         >
-                          {order.time}
+                          {new Date(order.time).toLocaleString()}
                         </p>
                       </div>
                       <div style={{ textAlign: "right" }}>
