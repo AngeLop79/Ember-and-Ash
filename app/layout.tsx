@@ -6,9 +6,9 @@ import Cart from "@/components/order/Cart";
 import PageTransition from "@/components/layout/PageTransition";
 
 export const metadata: Metadata = {
-  title: "Ember & Ash — Sapori alla brace",
+  title: "XIII Sagra del maiale",
   description:
-    "Scopri i sapori della cucina nigeriana alla brace. Ordina online, prenota un tavolo o ricevi il tuo ordine a domicilio.",
+    "Scopri i sapori della cucina calabrese. Effettua un preordine online.",
   icons: {
     icon: "/favicon.svg",
   },

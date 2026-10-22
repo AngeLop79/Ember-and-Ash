@@ -69,7 +69,7 @@ export default function HomePage() {
             right: "-1px",
             bottom: "-1px",
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=80')",
+              "url('/images/layout/salsiccia.jpeg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             filter: "brightness(0.3)",
@@ -96,7 +96,7 @@ export default function HomePage() {
           }}
         >
           <p className="section-label " style={{marginTop: "13px", marginBottom: "24px" }}>
-            🔥 Le ordinazioni sono aperte
+            🔥 Le ordinazioni sono aperte!
           </p>
           <h1
             className="font-display mobile-title"

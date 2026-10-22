@@ -115,7 +115,7 @@ export default function Navbar() {
                 letterSpacing: "0.01em",
               }}
             >
-              I ragazzi del sole
+              XIII° Sagra del Maiale
             </span>
           </Link>
 

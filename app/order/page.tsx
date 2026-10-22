@@ -142,9 +142,30 @@ export default function OrderPage() {
           paymentMethod,
         }),
       });
-      const result = await response.json();
+      const responseText = await response.text();
+      let result: unknown;
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `Il server ha restituito una risposta non valida (HTTP ${response.status}). Verifica il deploy dell’API /api/orders.`,
+        );
+      }
+
+      if (typeof result !== "object" || result === null) {
+        throw new Error("Il server ha restituito una risposta non valida.");
+      }
+
       if (!response.ok) {
-        throw new Error(result.error || "Non è stato possibile salvare l’ordine.");
+        const message =
+          "error" in result && typeof result.error === "string"
+            ? result.error
+            : "Non è stato possibile salvare l’ordine.";
+        throw new Error(message);
+      }
+
+      if (!("id" in result) || typeof result.id !== "string") {
+        throw new Error("Il server non ha restituito il codice dell’ordine.");
       }
 
       setOrderId(result.id);

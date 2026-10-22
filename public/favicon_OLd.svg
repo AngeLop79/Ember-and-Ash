@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Orange flame background -->
+  <circle cx="50" cy="50" r="48" fill="#1a1a1a"/>
+  
+  <!-- Flame shape -->
+  <g transform="translate(50, 50)">
+    <!-- Outer flame (orange) -->
+    <path d="M 0,-25 C -8,-15 -12,-5 -12,8 C -12,22 -5,32 0,32 C 5,32 12,22 12,8 C 12,-5 8,-15 0,-25 Z" fill="#E8541A"/>
+    
+    <!-- Middle flame (lighter) -->
+    <path d="M 0,-15 C -5,-8 -8,-2 -8,6 C -8,16 -3,24 0,24 C 3,24 8,16 8,6 C 8,-2 5,-8 0,-15 Z" fill="#FF6B35"/>
+    
+    <!-- Inner flame (yellow) -->
+    <path d="M 0,-8 C -3,-4 -5,0 -5,4 C -5,10 -2,14 0,14 C 2,14 5,10 5,4 C 5,0 3,-4 0,-8 Z" fill="#FFB347"/>
+  </g>
+</svg>

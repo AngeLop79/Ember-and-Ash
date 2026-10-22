@@ -75,7 +75,7 @@ export default function Cart() {
             <div style={{ textAlign: "center", padding: "60px 0", color: "#8A7566" }}>
               <ShoppingBag size={48} style={{ margin: "0 auto 16px", opacity: 0.3, display: "block" }} />
               <p style={{ fontFamily: "var(--font-display)", fontSize: "18px", marginBottom: "8px" }}>Il carrello è vuoto</p>
-              <p style={{ fontSize: "14px" }}>Aggiungi qualche piatto alla brace</p>
+              <p style={{ fontSize: "14px" }}>Aggiungi qualche piatto</p>
               <button
                 onClick={closeCart}
                 className="btn-ember"
