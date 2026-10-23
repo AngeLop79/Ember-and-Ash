@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/layout/Navbar";
-import Cart from "@/components/order/Cart";
+import SiteShell from "@/components/layout/SiteShell";
 import PageTransition from "@/components/layout/PageTransition";
 
 export const metadata: Metadata = {
@@ -26,11 +25,11 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className="grain">
-        <Navbar />
-        <Cart />
-        <main>
-          <PageTransition>{children}</PageTransition>
-        </main>
+        <SiteShell>
+          <main>
+            <PageTransition>{children}</PageTransition>
+          </main>
+        </SiteShell>
         <Toaster
           position="top-center"
           containerStyle={{ top: 80, zIndex: 9999 }}

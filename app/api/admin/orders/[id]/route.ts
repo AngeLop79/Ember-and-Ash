@@ -1,5 +1,5 @@
 import { isAdminApiRequest } from "@/lib/adminApiAuth";
-import { getDb } from "@/lib/db";
+import { changeOrder, OrderActionError } from "@/lib/cashDesk";
 
 export const runtime = "nodejs";
 
@@ -47,22 +47,17 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  let result;
   try {
-    result = await getDb().query(
-      "UPDATE orders SET status = $1 WHERE id = $2 RETURNING status",
-      [body.status, id.toUpperCase()],
-    );
+    const result = await changeOrder(id, { status: body.status as (typeof ORDER_STATUSES)[number] });
+    return Response.json(result, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
+    if (error instanceof OrderActionError) {
+      return Response.json({ error: error.message }, { status: error.status });
+    }
     console.error("Failed to update order status in PostgreSQL.", error);
     return Response.json(
       { error: "Impossibile aggiornare lo stato dell’ordine." },
       { status: 500 },
     );
   }
-  if (result.rowCount === 0) {
-    return Response.json({ error: "Ordine non trovato." }, { status: 404 });
-  }
-
-  return Response.json({ id: id.toUpperCase(), status: result.rows[0].status });
 }

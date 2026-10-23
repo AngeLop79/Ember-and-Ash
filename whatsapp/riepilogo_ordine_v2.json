@@ -1,0 +1,34 @@
+{
+  "name": "riepilogo_ordine_v2",
+  "language": "it",
+  "category": "UTILITY",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Ciao {{customer_name}}, abbiamo ricevuto il tuo ordine.\nNumero da mostrare in cassa: {{order_code}}.\nPiatti: {{items}}.\nTotale ordine: {{total}}.\nModalita': {{order_type}}.\nIndirizzo: {{address}}.\nSituazione al momento del messaggio: {{status}}.\nPagamento e ritiro vengono registrati separatamente dallo staff. Apri il riepilogo per lo stato aggiornato e accedi con l'account usato per ordinare.",
+      "example": {
+        "body_text_named_params": [
+          { "param_name": "customer_name", "example": "Mario Rossi" },
+          { "param_name": "order_code", "example": "A-042" },
+          { "param_name": "items", "example": "2 x Piatto del giorno (20,00 EUR)" },
+          { "param_name": "total", "example": "20,00 EUR" },
+          { "param_name": "order_type", "example": "Ritiro in sede" },
+          { "param_name": "address", "example": "Non previsto" },
+          { "param_name": "status", "example": "In attesa di conferma; da pagare in cassa" }
+        ]
+      }
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Visualizza ordine",
+          "url": "https://your-project.vercel.app/orders/{{order_id}}",
+          "example": ["EA-0123456789ABCDEF"]
+        }
+      ]
+    }
+  ]
+}

@@ -19,7 +19,6 @@ import {
   generateOrderId,
 } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
-import { hasAccounts } from "@/lib/demoAuth";
 import toast from "react-hot-toast";
 
 type ReservationStatus = "idle" | "success";
@@ -77,12 +76,7 @@ export default function ReservationsPage() {
 
   const guardWhatsAppAccess = () => {
     if (isAuthenticated) return true;
-    const hasAccount = hasAccounts();
-    toast.error(
-      hasAccount
-        ? "Accedi prima con la tua email e la tua password"
-        : "Crea un account prima di usare WhatsApp",
-    );
+    toast.error("Accedi o crea un account prima di usare WhatsApp");
     router.push("/auth?next=/reservations");
     return false;
   };

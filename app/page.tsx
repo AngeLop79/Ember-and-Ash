@@ -12,7 +12,6 @@ import {
 import { MENU_ITEMS, RESTAURANT_INFO } from "@/lib/data";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { hasAccounts } from "@/lib/demoAuth";
 import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -30,12 +29,7 @@ export default function HomePage() {
 
   const handleWhatsAppCTA = () => {
     if (!isAuthenticated) {
-      const hasAccount = hasAccounts();
-      toast.error(
-        hasAccount
-          ? "Accedi prima con la tua email e la tua password"
-          : "Crea un account prima di usare WhatsApp",
-      );
+      toast.error("Accedi o crea un account prima di usare WhatsApp");
       router.push("/auth?next=/");
       return;
     }

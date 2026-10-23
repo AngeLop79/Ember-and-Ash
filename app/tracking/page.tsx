@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { RESTAURANT_INFO } from "@/lib/data";
 import { useAuthStore } from "@/store/authStore";
-import { hasAccounts } from "@/lib/demoAuth";
+import MyOrders from "@/components/order/MyOrders";
 import toast from "react-hot-toast";
 
 type TrackingOrder = {
@@ -92,7 +92,7 @@ const STEPS = [
 
 export default function TrackingPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, hasHydrated, refreshSession } = useAuthStore();
   const [orderId, setOrderId] = useState("");
   const [searched, setSearched] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -167,12 +167,7 @@ export default function TrackingPage() {
 
   const openWhatsApp = (message?: string) => {
     if (!isAuthenticated) {
-      const hasAccount = hasAccounts();
-      toast.error(
-        hasAccount
-          ? "Accedi prima con la tua email e la tua password"
-          : "Crea un account prima di usare WhatsApp",
-      );
+      toast.error("Accedi o crea un account prima di usare WhatsApp");
       router.push("/auth?next=/tracking");
       return;
     }
@@ -182,6 +177,20 @@ export default function TrackingPage() {
       "_blank",
     );
   };
+
+  if (!hasHydrated) {
+    return (
+      <div style={{ padding: "100px 24px" }}>
+        <p>Verifica della sessione in corso...</p>
+        <button className="btn-ghost" onClick={() => {
+          void refreshSession().catch((error: unknown) => {
+            toast.error(error instanceof Error ? error.message : "Sessione non disponibile.");
+          });
+        }}>Riprova</button>
+      </div>
+    );
+  }
+  if (isAuthenticated && user) return <MyOrders key={user.id} />;
 
   return (
     <div
@@ -293,8 +302,9 @@ export default function TrackingPage() {
                 lineHeight: "1.6",
               }}
             >
-              Trovi il codice dell’ordine nell’SMS di conferma che ti abbiamo
-              inviato o nella schermata di conferma dell’acquisto.
+              Accedi per vedere tutti i tuoi ordini senza inserire codici.
+              La ricerca per codice resta disponibile per gli ordini precedenti
+              non associati a un account.
             </p>
             <div
               style={{

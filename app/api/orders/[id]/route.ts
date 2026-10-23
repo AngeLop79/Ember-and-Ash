@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/db";
+import { getCustomer } from "@/lib/customerAuth";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,7 @@ export async function GET(
   const { id } = await params;
   let result;
   try {
+    const user = await getCustomer();
     result = await getDb().query(
       `SELECT o.id, o.order_type, o.status,
         COALESCE(
@@ -27,9 +29,9 @@ export async function GET(
         ) AS items
        FROM orders o
        LEFT JOIN order_items oi ON oi.order_id = o.id
-       WHERE o.id = $1
+       WHERE o.id = $1 AND (o.customer_id IS NULL OR o.customer_id = $2)
        GROUP BY o.id`,
-      [id.toUpperCase()],
+      [id.toUpperCase(), user?.id ?? null],
     );
   } catch (error) {
     console.error("Failed to look up order in PostgreSQL.", error);

@@ -14,6 +14,7 @@ import {
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -30,7 +31,6 @@ export default function Navbar() {
     user,
     isAuthenticated,
     signOut,
-    hasHydrated: authHydrated,
   } = useAuthStore();
   const count = itemCount();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,19 +52,20 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (mobileOpen) {
-      setAccountOpen(false);
-    }
-  }, [mobileOpen]);
-
-  useEffect(() => {
     if (!cartHydrated) {
       useCartStore.persist.rehydrate();
     }
-    if (!authHydrated) {
-      useAuthStore.persist.rehydrate();
+  }, [cartHydrated]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setAccountOpen(false);
+      setMobileOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Impossibile uscire.");
     }
-  }, [cartHydrated, authHydrated]);
+  };
 
   return (
     <>
@@ -137,7 +138,7 @@ export default function Navbar() {
                   paddingBottom: "2px",
                 }}
               >
-                {link.label}
+                {link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}
               </Link>
             ))}
           </div>
@@ -241,30 +242,9 @@ export default function Navbar() {
                           gap: "8px",
                         }}
                       >
-                        <Link
-                          href="/auth"
-                          onClick={() => {
-                            signOut();
-                            setAccountOpen(false);
-                          }}
-                          style={{
-                            textDecoration: "none",
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            color: "#D4A843",
-                            padding: "10px 12px",
-                            borderRadius: "10px",
-                            border: "1px solid rgba(212,168,67,0.35)",
-                            background: "rgba(212,168,67,0.08)",
-                          }}
-                        >
-                          Crea un nuovo account
-                        </Link>
-
                         <button
                           onClick={() => {
-                            signOut();
-                            setAccountOpen(false);
+                            void handleSignOut();
                           }}
                           style={{
                             fontSize: "13px",
@@ -368,29 +348,12 @@ export default function Navbar() {
               </span>
             </button>
 
-            {/* Admin link */}
-            <Link
-              href="/admin"
-              className="admin-link"
-              style={{
-                textDecoration: "none",
-                fontSize: "12px",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#D4A843",
-                padding: "8px 12px",
-                border: "1px solid rgba(212,168,67,0.3)",
-                borderRadius: "999px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Amministrazione
-            </Link>
-
             {/* Mobile menu toggle */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() => {
+                setAccountOpen(false);
+                setMobileOpen(!mobileOpen);
+              }}
               style={{
                 background: "transparent",
                 border: "none",
@@ -538,7 +501,7 @@ export default function Navbar() {
                         gap: "12px",
                       }}
                     >
-                      <span>{link.label}</span>
+                      <span>{link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}</span>
                       <ChevronRight size={16} color="#8A7566" />
                     </Link>
                   ))}
@@ -641,8 +604,7 @@ export default function Navbar() {
                 {isAuthenticated && (
                   <button
                     onClick={() => {
-                      signOut();
-                      setMobileOpen(false);
+                      void handleSignOut();
                     }}
                     style={{
                       padding: "14px 16px",
@@ -662,27 +624,6 @@ export default function Navbar() {
                   </button>
                 )}
 
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    textDecoration: "none",
-                    padding: "14px 16px",
-                    borderRadius: "14px",
-                    border: "1px solid rgba(212,168,67,0.28)",
-                    background: "rgba(18,14,12,0.98)",
-                    color: "#D4A843",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  <span>Amministrazione</span>
-                  <ChevronRight size={16} />
-                </Link>
               </div>
             </div>
           </div>
@@ -695,7 +636,7 @@ export default function Navbar() {
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
-          .account-link, .admin-link { display: none !important; }
+          .account-link { display: none !important; }
         }
 
         @media (max-width: 420px) {

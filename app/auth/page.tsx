@@ -4,14 +4,13 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { readAccounts, saveAccounts, type Account } from "@/lib/demoAuth";
 import toast from "react-hot-toast";
 
 type AuthMode = "signin" | "signup";
 
 export default function AuthPage() {
   const router = useRouter();
-  const { signIn } = useAuthStore();
+  const { signIn, user, isAuthenticated, hasHydrated } = useAuthStore();
 
   const [mode, setMode] = useState<AuthMode>("signin");
   const [loading, setLoading] = useState(false);
@@ -29,6 +28,36 @@ export default function AuthPage() {
     confirmPassword: "",
   });
 
+  const authenticate = async (mode: AuthMode) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode,
+          ...(mode === "signup" ? signupForm : signinForm),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Accesso non riuscito.");
+      signIn(result.user);
+      setSigninForm({ email: "", password: "" });
+      setSignupForm({ name: "", email: "", phone: "", password: "", confirmPassword: "" });
+      toast.success(mode === "signup" ? "Account creato" : "Bentornato!");
+      setSuccessState({ name: result.user.name, action: mode === "signup" ? "signed up" : "logged in" });
+      const next = new URLSearchParams(window.location.search).get("next");
+      if (next && (["/", "/order", "/tracking", "/reservations", "/menu"].includes(next) ||
+          /^\/orders\/EA-[A-Fa-f0-9]{16}$/.test(next))) {
+        router.replace(next);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Accesso non riuscito.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignIn = (event: FormEvent) => {
     event.preventDefault();
     const email = signinForm.email.trim().toLowerCase();
@@ -39,29 +68,13 @@ export default function AuthPage() {
       return;
     }
 
-    setLoading(true);
-    const account = readAccounts().find(
-      (item: Account) =>
-        item.email.toLowerCase() === email && item.password === password,
-    );
-
-    if (!account) {
-      setLoading(false);
-      toast.error("Account non trovato. Registrati prima.");
-      return;
-    }
-
-    signIn({ name: account.name, email: account.email, phone: account.phone });
-    setLoading(false);
-    toast.success("Bentornato!");
-    setSuccessState({ name: account.name, action: "logged in" });
+    void authenticate("signin");
   };
 
   const handleSignUp = (event: FormEvent) => {
     event.preventDefault();
     const name = signupForm.name.trim();
     const email = signupForm.email.trim().toLowerCase();
-    const phone = signupForm.phone.trim();
     const password = signupForm.password;
     const confirmPassword = signupForm.confirmPassword;
 
@@ -70,8 +83,8 @@ export default function AuthPage() {
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("La password deve contenere almeno 6 caratteri");
+    if (password.length < 10 || password.length > 128) {
+      toast.error("La password deve contenere da 10 a 128 caratteri");
       return;
     }
 
@@ -80,26 +93,10 @@ export default function AuthPage() {
       return;
     }
 
-    setLoading(true);
-    const accounts = readAccounts();
-    const exists = accounts.some(
-      (item: Account) => item.email.toLowerCase() === email,
-    );
-    if (exists) {
-      setLoading(false);
-      toast.error("Questa email è già registrata. Accedi.");
-      return;
-    }
-
-    const newAccount: Account = { name, email, phone, password };
-    saveAccounts([...accounts, newAccount]);
-    signIn({ name, email, phone });
-    setLoading(false);
-    toast.success("Account creato");
-    setSuccessState({ name, action: "signed up" });
+    void authenticate("signup");
   };
 
-  if (successState) {
+  if (hasHydrated && isAuthenticated && user) {
     return (
       <div
         className="page-shell auth-page-shell w-full max-w-full overflow-x-hidden"
@@ -142,9 +139,9 @@ export default function AuthPage() {
             className="section-label"
             style={{ marginBottom: "10px", color: "#34D399" }}
           >
-            {successState.action === "logged in"
-              ? "Accesso effettuato"
-              : "Registrazione completata"}
+            {successState?.action === "signed up"
+              ? "Registrazione completata"
+              : "Accesso effettuato"}
           </p>
           <h1
             className="font-display"
@@ -155,7 +152,7 @@ export default function AuthPage() {
               marginBottom: "10px",
             }}
           >
-            Benvenuto, {successState.name}
+            Benvenuto, {successState?.name ?? user?.name}
           </h1>
           <p
             style={{
@@ -434,7 +431,7 @@ export default function AuthPage() {
                 <input
                   className="input-field"
                   type="password"
-                  placeholder="Almeno 6 caratteri"
+                  placeholder="Da 10 a 128 caratteri"
                   value={signupForm.password}
                   onChange={(event) =>
                     setSignupForm({

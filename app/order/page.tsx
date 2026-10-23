@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
-import { hasAccounts } from "@/lib/demoAuth";
 import {
   formatPrice,
   buildWhatsAppOrderMessage,
@@ -27,12 +26,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useFeatureStore } from "@/store/featureStore";
 
 type Step = "cart" | "details" | "payment" | "confirm";
 type OrderType = "delivery" | "pickup" | "dine-in";
 type PaymentMethod = "card" | "cash" | "transfer";
 
 export default function OrderPage() {
+  const whatsappEnabled = useFeatureStore((state) => state.whatsappOrderNotifications);
   const router = useRouter();
   const { items, updateQuantity, removeItem, subtotal, clearCart } =
     useCartStore();
@@ -47,7 +48,11 @@ export default function OrderPage() {
     address: "",
   });
   const [orderId, setOrderId] = useState("");
+  const [publicCode, setPublicCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [whatsappConsent, setWhatsappConsent] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const requestRef = useRef<{ body: string; key: string } | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: "",
@@ -87,17 +92,17 @@ export default function OrderPage() {
 
   const guardWhatsAppAccess = () => {
     if (isAuthenticated) return true;
-    const hasAccount = hasAccounts();
-    toast.error(
-      hasAccount
-        ? "Accedi prima con la tua email e la tua password"
-        : "Crea un account prima di usare WhatsApp",
-    );
+    toast.error("Accedi o crea un account prima di usare WhatsApp");
     router.push("/auth?next=/order");
     return false;
   };
 
   const handlePlaceOrder = async () => {
+    if (loading) return;
+    if (whatsappEnabled && whatsappConsent && !/^\+[1-9]\d{7,14}$/.test(customer.phone.replace(/[\s()-]/g, ""))) {
+      toast.error("Per WhatsApp inserisci il telefono con prefisso internazionale, ad esempio +39.");
+      return;
+    }
     if (isRestaurantClosed) {
       toast.error("Per oggi siamo chiusi. Riprova domani.");
       return;
@@ -128,19 +133,23 @@ export default function OrderPage() {
 
     setLoading(true);
     try {
+      const body = JSON.stringify({
+        items: items.map(({ id, quantity, notes }) => ({ id, quantity, notes })),
+        customer,
+        type: orderType,
+        paymentMethod,
+        whatsappConsent: whatsappEnabled && whatsappConsent,
+      });
+      if (requestRef.current?.body !== body) {
+        requestRef.current = { body, key: crypto.randomUUID() };
+      }
       const response = await fetch("/api/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map(({ id, quantity, notes }) => ({
-            id,
-            quantity,
-            notes,
-          })),
-          customer,
-          type: orderType,
-          paymentMethod,
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": requestRef.current.key,
+        },
+        body,
       });
       const responseText = await response.text();
       let result: unknown;
@@ -157,6 +166,10 @@ export default function OrderPage() {
       }
 
       if (!response.ok) {
+        if (response.status === 401) {
+          await useAuthStore.getState().refreshSession();
+          router.push("/auth?next=/order");
+        }
         const message =
           "error" in result && typeof result.error === "string"
             ? result.error
@@ -164,11 +177,18 @@ export default function OrderPage() {
         throw new Error(message);
       }
 
-      if (!("id" in result) || typeof result.id !== "string") {
+      if (!("id" in result) || typeof result.id !== "string" ||
+          !("publicCode" in result) || typeof result.publicCode !== "string") {
         throw new Error("Il server non ha restituito il codice dell’ordine.");
       }
 
       setOrderId(result.id);
+      setPublicCode(result.publicCode);
+      setNotificationMessage(
+        "notification" in result && typeof result.notification === "string"
+          ? result.notification
+          : "",
+      );
       setStep("confirm");
       clearCart();
       toast.success("Ordine salvato correttamente! 🔥");
@@ -231,14 +251,17 @@ export default function OrderPage() {
               marginBottom: "12px",
             }}
           >
-            Ordine confermato!
+            Ordine ricevuto!
           </h1>
+          <p style={{ color: "#D4A843", marginBottom: "16px" }} role="status">
+            In attesa di conferma del ristorante. {whatsappEnabled && notificationMessage}
+          </p>
           <p
             style={{ color: "#8A7566", marginBottom: "8px", fontSize: "15px" }}
           >
             Il tuo ordine{" "}
-            <span style={{ color: "#E8541A", fontWeight: 700 }}>
-              #{orderId}
+            <span style={{ color: "#E8541A", fontWeight: 700, fontSize: "40px", display: "block", margin: "12px 0" }}>
+              {publicCode}
             </span>{" "}
             è stato ricevuto.
           </p>
@@ -250,8 +273,8 @@ export default function OrderPage() {
               lineHeight: "1.6",
             }}
           >
-            Stiamo preparando la cucina. Tempo stimato:{" "}
-            <strong style={{ color: "#F5EDD8" }}>30–45 minuti</strong>
+            Mostra questo numero in cassa. Pagamento e ritiro vengono registrati
+            separatamente dallo staff. Nessun addebito online e&apos; stato eseguito.
           </p>
           <div
             style={{
@@ -261,7 +284,7 @@ export default function OrderPage() {
               flexWrap: "wrap",
             }}
           >
-            <Link href="/tracking" style={{ textDecoration: "none" }}>
+            <Link href={`/orders/${orderId}`} style={{ textDecoration: "none" }}>
               <button
                 className="btn-ember"
                 style={{
@@ -273,7 +296,7 @@ export default function OrderPage() {
                   gap: "8px",
                 }}
               >
-                <Truck size={16} /> Traccia l’ordine
+                <Truck size={16} /> Visualizza ordine
               </button>
             </Link>
             <Link href="/menu" style={{ textDecoration: "none" }}>
@@ -1290,6 +1313,20 @@ export default function OrderPage() {
                     </p>
                   </div>
                 )}
+
+                {whatsappEnabled && <label style={{ display: "flex", gap: "12px", alignItems: "flex-start", margin: "20px 0", fontSize: "14px" }}>
+                  <input
+                    type="checkbox"
+                    checked={whatsappConsent}
+                    onChange={(event) => setWhatsappConsent(event.target.checked)}
+                    disabled={loading}
+                  />
+                  <span>
+                    Desidero ricevere su WhatsApp il riepilogo di questo ordine al
+                    numero indicato. Inserisci il prefisso internazionale (es. +39).
+                    Il consenso e&apos; facoltativo.
+                  </span>
+                </label>}
 
                 {isRestaurantClosed && (
                   <div
