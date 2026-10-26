@@ -36,6 +36,36 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDialogElement>(null);
+  const mobileCloseRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const dialog = mobileMenuRef.current;
+    if (!dialog) return;
+
+    // The native top layer escapes the navbar's backdrop-filter containing block.
+    dialog.showModal();
+    mobileCloseRef.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    const previousRootOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    const desktop = window.matchMedia("(min-width: 769px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousRootOverflow;
+      desktop.removeEventListener("change", closeOnDesktop);
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -350,6 +380,11 @@ export default function Navbar() {
 
             {/* Mobile menu toggle */}
             <button
+              type="button"
+              aria-label="Apri il menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
+              aria-haspopup="dialog"
               onClick={() => {
                 setAccountOpen(false);
                 setMobileOpen(!mobileOpen);
@@ -373,265 +408,234 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div
-            className="slide-in"
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(5,4,3,0.98)",
-              backdropFilter: "blur(10px)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 1101,
-            }}
+      <dialog
+        ref={mobileMenuRef}
+        id="mobile-navigation"
+        className="mobile-navigation"
+        aria-label="Menu principale"
+        onCancel={() => setMobileOpen(false)}
+      >
+        <div className="mobile-navigation-header">
+          <Link href="/" className="mobile-navigation-brand" onClick={() => setMobileOpen(false)}>
+            <Flame size={22} color="#E8541A" aria-hidden="true" />
+            <span className="font-display logo-text">XIII° Sagra del Maiale</span>
+          </Link>
+          <button
+            ref={mobileCloseRef}
+            type="button"
+            className="mobile-navigation-close"
+            aria-label="Chiudi il menu"
+            onClick={() => setMobileOpen(false)}
           >
-            <button
-              aria-label="Chiudi il menu"
-              onClick={() => setMobileOpen(false)}
-              style={{
-                position: "absolute",
-                inset: 0,
-                border: "none",
-                background: "transparent",
-                cursor: "default",
-              }}
-            />
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                background: "#050403",
-                padding: "24px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-                position: "relative",
-              }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                  paddingBottom: "12px",
-                  borderBottom: "1px solid rgba(61,48,40,0.8)",
-                }}
+            <X size={22} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="mobile-navigation-body">
+          <nav aria-label="Navigazione mobile" className="mobile-navigation-links">
+            <p className="section-label">Esplora la sagra</p>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="mobile-navigation-link"
+                aria-current={pathname === link.href ? "page" : undefined}
+                onClick={() => setMobileOpen(false)}
               >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  <Flame size={20} color="#E8541A" />
-                  <span
-                    className="font-display"
-                    style={{
-                      color: "#F5EDD8",
-                      fontSize: "18px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    I ragazzi del sole
-                  </span>
-                </div>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "12px",
-                    border: "1px solid rgba(61,48,40,0.95)",
-                    background: "rgba(18,14,12,0.98)",
-                    color: "#F5EDD8",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <X size={18} />
-                </button>
-              </div>
+                <span className="font-display">
+                  {link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}
+                </span>
+                <ChevronRight size={20} aria-hidden="true" />
+              </Link>
+            ))}
+          </nav>
 
-              <div
-                style={{
-                  display: "flex",
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  style={{
-                    width: "min(720px, 92%)",
-                    background: "#0F0B09",
-                    padding: "18px",
-                    borderRadius: "16px",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                    alignItems: "stretch",
-                  }}
-                >
-                  {NAV_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      style={{
-                        textDecoration: "none",
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        color: pathname === link.href ? "#F5EDD8" : "#CDBFB0",
-                        padding: "16px 18px",
-                        borderRadius: "12px",
-                        border: "1px solid rgba(61,48,40,0.9)",
-                        background:
-                          pathname === link.href
-                            ? "rgba(232,84,26,0.20)"
-                            : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "12px",
-                      }}
-                    >
-                      <span>{link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}</span>
-                      <ChevronRight size={16} color="#8A7566" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gap: "10px",
-                  marginTop: "auto",
-                  paddingTop: "8px",
-                  borderTop: "1px solid rgba(61,48,40,0.8)",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "14px 16px",
-                    borderRadius: "14px",
-                    border: "1px solid rgba(212,168,67,0.25)",
-                    background: "rgba(18,14,12,0.98)",
-                    color: "#F5EDD8",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "4px",
-                    }}
-                  >
-                    {isAuthenticated && (
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "#8A7566",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.08em",
-                        }}
-                      >
-                        Hai effettuato l’accesso
-                      </span>
-                    )}
-                    <span
-                      style={{ color: isAuthenticated ? "#34D399" : "#F5EDD8" }}
-                    >
-                      {isAuthenticated && user?.name ? user.name : "Profilo"}
-                    </span>
-                  </div>
-                </div>
-
-                {!isAuthenticated && (
-                  <>
-                    <Link
-                      href="/auth"
-                      onClick={() => setMobileOpen(false)}
-                      style={{
-                        textDecoration: "none",
-                        padding: "14px 16px",
-                        borderRadius: "14px",
-                        border: "1px solid rgba(61,48,40,0.9)",
-                        background: "rgba(26,22,18,0.98)",
-                        color: "#F5EDD8",
-                        fontWeight: 700,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>Accedi</span>
-                      <ChevronRight size={16} color="#8A7566" />
-                    </Link>
-
-                    <Link
-                      href="/auth"
-                      onClick={() => setMobileOpen(false)}
-                      style={{
-                        textDecoration: "none",
-                        padding: "14px 16px",
-                        borderRadius: "14px",
-                        border: "1px solid rgba(212,168,67,0.28)",
-                        background: "rgba(212,168,67,0.08)",
-                        color: "#D4A843",
-                        fontWeight: 700,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>Crea un nuovo account</span>
-                      <ChevronRight size={16} color="#D4A843" />
-                    </Link>
-                  </>
-                )}
-
-                {isAuthenticated && (
-                  <button
-                    onClick={() => {
-                      void handleSignOut();
-                    }}
-                    style={{
-                      padding: "14px 16px",
-                      borderRadius: "14px",
-                      border: "1px solid rgba(248,113,113,0.32)",
-                      background: "#2A1212",
-                      color: "#FCA5A5",
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <span>Esci</span>
-                    <LogOut size={16} />
-                  </button>
-                )}
-
+          <div className="mobile-navigation-account">
+            <div className="mobile-navigation-profile">
+              <User size={20} aria-hidden="true" />
+              <div>
+                <p className="mobile-navigation-caption">
+                  {isAuthenticated ? "Hai effettuato l’accesso" : "Il tuo spazio"}
+                </p>
+                <p className="mobile-navigation-name">
+                  {isAuthenticated && user?.name ? user.name : "Profilo"}
+                </p>
               </div>
             </div>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className="mobile-navigation-action mobile-navigation-signout"
+                onClick={() => { void handleSignOut(); }}
+              >
+                <span>Esci</span>
+                <LogOut size={18} aria-hidden="true" />
+              </button>
+            ) : (
+              <div className="mobile-navigation-actions">
+                <Link href="/auth" className="mobile-navigation-action mobile-navigation-login" onClick={() => setMobileOpen(false)}>
+                  Accedi <ChevronRight size={18} aria-hidden="true" />
+                </Link>
+                <Link href="/auth" className="mobile-navigation-register" onClick={() => setMobileOpen(false)}>
+                  Crea un nuovo account <ChevronRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+            )}
           </div>
-        )}
-      </nav>
+        </div>
+      </dialog>
 
       <style>{`
         .logo-text { font-size: 20px; }
+
+        .mobile-navigation {
+          position: fixed;
+          inset: 0;
+          margin: 0;
+          width: 100%;
+          max-width: none;
+          height: 100dvh;
+          max-height: none;
+          padding: 0;
+          border: 0;
+          color: var(--cream);
+          background: radial-gradient(ellipse at 100% 0%, #352218 0%, var(--ash) 55%);
+          overflow: hidden;
+        }
+        .mobile-navigation[open] {
+          display: flex;
+          flex-direction: column;
+          animation: mobileMenuReveal 0.22s ease-out;
+        }
+        .mobile-navigation::backdrop { background: var(--ash); }
+        .mobile-navigation-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
+          border-bottom: 1px solid var(--ash-light);
+          flex-shrink: 0;
+        }
+        .mobile-navigation-brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+          color: var(--cream);
+          text-decoration: none;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+        }
+        .mobile-navigation-brand svg { flex-shrink: 0; }
+        .mobile-navigation-close {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          width: 44px;
+          height: 44px;
+          border: 1px solid var(--ash-light);
+          border-radius: 50%;
+          background: var(--surface);
+          color: var(--cream);
+          cursor: pointer;
+        }
+        .mobile-navigation-body {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          padding: clamp(24px, 5vh, 48px) 24px calc(24px + env(safe-area-inset-bottom));
+          gap: 32px;
+        }
+        .mobile-navigation-links, .mobile-navigation-account {
+          width: 100%;
+          max-width: 520px;
+          margin-inline: auto;
+        }
+        .mobile-navigation-links .section-label { margin-bottom: 16px; }
+        .mobile-navigation-link {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          min-height: 62px;
+          padding: 14px 4px;
+          border-bottom: 1px solid var(--ash-light);
+          color: var(--cream);
+          text-decoration: none;
+          font-size: clamp(24px, 5vw, 30px);
+          font-weight: 700;
+          transition: color 0.2s, padding 0.2s;
+        }
+        .mobile-navigation-link svg { color: var(--muted); flex-shrink: 0; }
+        .mobile-navigation-link[aria-current="page"],
+        .mobile-navigation-link[aria-current="page"] svg { color: var(--ember-light); }
+        .mobile-navigation-link[aria-current="page"] { border-bottom-color: var(--ember); }
+        .mobile-navigation-link:hover { color: var(--ember-light); padding-inline: 10px; }
+        .mobile-navigation-account {
+          margin-top: auto;
+          padding: 20px;
+          border: 1px solid var(--ash-light);
+          border-radius: 20px;
+          background: var(--surface);
+        }
+        .mobile-navigation-profile { display: flex; align-items: center; gap: 12px; }
+        .mobile-navigation-profile > svg { color: var(--gold); flex-shrink: 0; }
+        .mobile-navigation-caption { color: var(--cream-dark); font-size: 12px; margin-bottom: 4px; }
+        .mobile-navigation-name { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+        .mobile-navigation-actions { display: grid; gap: 16px; margin-top: 18px; }
+        .mobile-navigation-action {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          width: 100%;
+          min-height: 48px;
+          padding: 12px 16px;
+          border: 1px solid transparent;
+          border-radius: 12px;
+          font: inherit;
+          font-size: 14px;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .mobile-navigation-login { background: var(--ember); color: var(--white); }
+        .mobile-navigation-login:hover { background: var(--ember-dark); }
+        .mobile-navigation-register {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 44px;
+          color: var(--gold-light);
+          text-decoration: none;
+          font-size: 13px;
+        }
+        .mobile-navigation-signout {
+          margin-top: 18px;
+          background: #2A1212;
+          border-color: rgba(248,113,113,0.32);
+          color: #FCA5A5;
+        }
+        .mobile-navigation :is(a, button):focus-visible {
+          outline: 2px solid var(--gold-light);
+          outline-offset: 4px;
+        }
+        @keyframes mobileMenuReveal {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mobile-navigation[open] { animation: none; }
+          .mobile-navigation-link { transition: none; }
+        }
 
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
