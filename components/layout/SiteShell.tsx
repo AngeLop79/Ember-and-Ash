@@ -46,7 +46,11 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
           <Cart />
         </>
       )}
-      {children}
+      {isAdmin ? children : (
+        <div style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
+          {children}
+        </div>
+      )}
     </>
   );
 }

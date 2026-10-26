@@ -100,19 +100,17 @@ export default function Navbar() {
   return (
     <>
       <nav
+        className="site-navbar"
         style={{
           position: "fixed",
           top: 0,
           left: 0,
           right: 0,
           zIndex: 1000,
+          paddingTop: "env(safe-area-inset-top, 0px)",
           borderBottom: mobileOpen
             ? "1px solid rgba(61,48,40,0.8)"
             : "1px solid #3D3028",
-          backdropFilter: "blur(20px)",
-          backgroundColor: mobileOpen
-            ? "rgba(5,4,3,0.98)"
-            : "rgba(26,22,18,0.92)",
         }}
       >
         <div
@@ -489,6 +487,10 @@ export default function Navbar() {
 
       <style>{`
         .logo-text { font-size: 20px; }
+        .site-navbar {
+          background: rgba(26,22,18,0.92);
+          backdrop-filter: blur(20px);
+        }
 
         .mobile-navigation {
           position: fixed;
@@ -638,6 +640,7 @@ export default function Navbar() {
         }
 
         @media (max-width: 768px) {
+          .site-navbar { background: var(--ash); backdrop-filter: none; }
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
           .account-link { display: none !important; }

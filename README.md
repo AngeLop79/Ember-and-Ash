@@ -11,6 +11,8 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 - Prenota un tavolo tramite il modulo dedicato o WhatsApp.
 - Consulta i recapiti, gli orari di apertura e l'indirizzo del ristorante.
 - Crea un account cliente nel database e consulta lo storico personale, anche da dispositivi diversi.
+- Su mobile, naviga da un menu a schermo intero con sfondo opaco, scorrimento interno e accesso al profilo. Si chiude dal pulsante dedicato, con Esc o selezionando un collegamento; il focus resta nel menu e lo scorrimento della pagina sottostante viene bloccato.
+- La barra di navigazione mobile ha uno sfondo opaco che copre anche l'area sicura superiore del dispositivo; il contenuto pubblico tiene conto dello stesso spazio.
 - Ricevi il riepilogo ordine via WhatsApp Business Platform, con consenso facoltativo e configurazione Meta.
 - Usa l'accesso staff separato per il pannello di amministrazione.
 - Gestisci gli ordini salvati, le prenotazioni e le voci del menu dall'area admin.

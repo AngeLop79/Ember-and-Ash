@@ -85,7 +85,7 @@ export default function MyOrders() {
           <p style={{ color: "#8A7566" }}>Tutti gli ordini del tuo account, dal piu&apos; recente. Non serve inserire codici.</p>
         </div>
         <button className="btn-ember" disabled={loading} onClick={() => refresh()}>
-          {loading ? "Caricamento..." : "Aggiorna stati"}
+          {loading ? "Caricamento..." : "Aggiorna"}
         </button>
       </div>
       {error && <p role="alert" style={{ color: "#FCA5A5", marginBottom: "20px" }}>{error}</p>}
