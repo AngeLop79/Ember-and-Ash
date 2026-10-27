@@ -177,9 +177,9 @@ export default function HomePage() {
             }}
           >
             {[
-              { label: "Piatti in menu", value: "50+" },
+              { label: "Piatti in menu", value: "10+" },
               { label: "Ospiti soddisfatti", value: "12k+" },
-              { label: "Anni di brace", value: "8" },
+              { label: "Anni di maialate", value: "13+" },
               { label: "Valutazione", value: "4.9★" },
             ].map((stat) => (
               <div key={stat.label}>
@@ -384,7 +384,7 @@ export default function HomePage() {
               {
                 step: "01",
                 title: "Sfoglia il menu",
-                desc: "Scopri i piatti alla brace: antipasti, primi, grigliate, zuppe e molto altro.",
+                desc: "Scopri i piatti a base di maiale: piatti unici, mitici panini e piatti della tradizione.",
                 icon: "🍽️",
               },
               {
@@ -395,12 +395,6 @@ export default function HomePage() {
               },
               {
                 step: "03",
-                title: "Scegli come riceverlo",
-                desc: "Consegna a domicilio, ritiro o consumo al ristorante. Paga con carta, bonifico o contanti.",
-                icon: "🛵",
-              },
-              {
-                step: "04",
                 title: "Segui l’ordine e gusta",
                 desc: "Segui l’avanzamento dell’ordine e assapora ogni boccone cotto alla brace.",
                 icon: "🔥",
