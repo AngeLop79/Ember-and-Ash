@@ -22,10 +22,8 @@ export const RESTAURANT_INFO = {
 
 export const CATEGORIES = [
   { id: "all", label: "Tutti" },
-  { id: "starters", label: "Antipasti" },
   { id: "mains", label: "Piatti principali" },
   { id: "grills", label: "Griglia" },
-  { id: "soups", label: "Zuppe" },
   { id: "sides", label: "Contorni" },
   { id: "drinks", label: "Bevande" },
   { id: "desserts", label: "Dolci" },
@@ -38,7 +36,7 @@ export const MENU_ITEMS: MenuItem[] = [
   description:
     "Stinco di maiale cotto lentamente al forno, dalla crosticina dorata e croccante, servito con una ciotolina di fagioli saporiti.",
   price: 1000,
-  category: "starters",
+  category: "mains",
   image: "/images/menu/stinco.jpg",
   tags: ["popular", "bestseller"],
   available: true,
@@ -52,103 +50,13 @@ export const MENU_ITEMS: MenuItem[] = [
     description:
       "Panino caldo e fragrante farcito con soffritto di salsiccia sbriciolata e saporita, accompagnato da salse a scelta",
     price: 500,
-    category: "street-food",
+    category: "mains",
     image: "/images/menu/panino.jpg",
     tags: ["grilled", "popular", "bestseller"],
     available: true,
     featured: true,
     spiceLevel: 1,
     prepTime: 20,
-  },
-  {
-    id: "3",
-    name: "Ofe Onugbu",
-    description:
-      "Zuppa tradizionale di foglie amare con carni miste, stoccafisso e olio di palma",
-    price: 347,
-    category: "soups",
-    image:
-      "https://tse4.mm.bing.net/th/id/OIP.mYKOCyaqEwrh6PvMD6DnUgHaE4?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["traditional", "hearty"],
-    available: true,
-    featured: false,
-    spiceLevel: 1,
-    prepTime: 25,
-  },
-  {
-    id: "4",
-    name: "Riso jollof alla brace",
-    description:
-      "Riso al pomodoro dal gusto affumicato e dai bordi tostati, servito con pollo alla griglia e platano fritto",
-    price: 321,
-    category: "mains",
-    image:
-      "https://tse1.mm.bing.net/th/id/OIP.8u0ljZC2sFTUW2r7s6H-wwHaJQ?w=2448&h=3059&rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["popular", "bestseller"],
-    available: true,
-    featured: true,
-    spiceLevel: 1,
-    prepTime: 20,
-  },
-  {
-    id: "5",
-    name: "Bistecca T-bone",
-    description:
-      "T-bone di prima scelta da 1 kg, cotta alla brace secondo il tuo gusto e servita con burro alle erbe e verdure arrosto",
-    price: 1236,
-    category: "grills",
-    image:
-      "https://tse1.explicit.bing.net/th/id/OIP.C4TwLl0rM1phue0Vrlz3KwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["premium", "grill"],
-    available: true,
-    featured: true,
-    spiceLevel: 0,
-    prepTime: 30,
-  },
-  {
-    id: "6",
-    name: "Zuppa di egusi",
-    description:
-      "Semi di melone macinati, cotti con spinaci, carni miste, gamberetti e olio di palma",
-    price: 327,
-    category: "soups",
-    image:
-      "https://i.pinimg.com/originals/57/fb/c3/57fbc3f4f9d1c5cb17955498947730ea.jpg",
-    tags: ["traditional"],
-    available: true,
-    featured: false,
-    spiceLevel: 1,
-    prepTime: 25,
-  },
-  {
-    id: "7",
-    name: "Igname pestato",
-    description:
-      "Purè di igname morbido ed elastico, l’accompagnamento perfetto per ogni zuppa",
-    price: 80,
-    category: "sides",
-    image:
-      "https://th.bing.com/th/id/R.a3ba2285d39575b527a6e3357b757df6?rik=Cz27xh3XLe8xOg&pid=ImgRaw&r=0",
-    tags: ["sides", "swallow"],
-    available: true,
-    featured: false,
-    spiceLevel: 0,
-    prepTime: 10,
-  },
-  {
-    id: "8",
-    name: "Platano fritto",
-    description:
-      "Platano maturo fritto fino a diventare dorato e caramellato: una specialità di Lagos",
-    price: 60,
-    category: "sides",
-    image:
-      "https://tse4.mm.bing.net/th/id/OIP.Srv0mCjs-55QBbuYgkZofAHaE7?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["sides", "vegetarian"],
-    available: true,
-    featured: false,
-    spiceLevel: 0,
-    prepTime: 8,
   },
   {
   id: "9",
@@ -191,25 +99,10 @@ export const MENU_ITEMS: MenuItem[] = [
   prepTime: 1,
 },
   {
-    id: "12",
-    name: "Tortino dal cuore morbido",
-    description:
-      "Tortino caldo al cioccolato dal cuore morbido, servito con gelato alla vaniglia",
-    price: 187,
-    category: "desserts",
-    image:
-      "https://insanelygoodrecipes.com/wp-content/uploads/2024/12/Lava-Cake-2-683x1024.jpg",
-    tags: ["desserts", "chocolate"],
-    available: true,
-    featured: false,
-    spiceLevel: 0,
-    prepTime: 15,
-  },
-  {
     id: "13",
-    name: "Costolette d'agnello",
+    name: "Costolette di maiale alla griglia",
     description:
-      "Costolette d’agnello tagliate alla francese, marinate alla menta e pepe e grigliate su brace di legna",
+      "Costolette di maiale , servite con contorno di verdure grigliate e patate al forno",
     price: 802,
     category: "grills",
     image:
@@ -219,37 +112,7 @@ export const MENU_ITEMS: MenuItem[] = [
     featured: false,
     spiceLevel: 1,
     prepTime: 25,
-  },
-  {
-    id: "14",
-    name: "Asun",
-    description:
-      "Carne di capra affumicata in una salsa intensa di peperoncino e cipolla, immancabile durante l’Owambe",
-    price: 367,
-    category: "starters",
-    image:
-      "https://tse3.mm.bing.net/th/id/OIP.JQPvTYmXqo_H-s_BUW6MEwHaKL?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["spicy", "smoky"],
-    available: true,
-    featured: false,
-    spiceLevel: 3,
-    prepTime: 15,
-  },
-  {
-    id: "15",
-    name: "Nkwobi",
-    description:
-      "Zampetto di manzo speziato in una ricca crema di ugba e semi di palma, cotto lentamente a puntino",
-    price: 387,
-    category: "starters",
-    image:
-      "https://tse2.mm.bing.net/th/id/OIP.Zazj-ilNUw0KqJNxc3rWYAHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["traditional", "spicy"],
-    available: true,
-    featured: false,
-    spiceLevel: 2,
-    prepTime: 20,
-  },
+  }
 ];
 
 export const TIMES = [

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
+import { reservationsEnabled } from "@/lib/features";
 
 type AuthMode = "signin" | "signup";
 
@@ -47,8 +48,13 @@ export default function AuthPage() {
       toast.success(mode === "signup" ? "Account creato" : "Bentornato!");
       setSuccessState({ name: result.user.name, action: mode === "signup" ? "signed up" : "logged in" });
       const next = new URLSearchParams(window.location.search).get("next");
-      if (next && (["/", "/order", "/tracking", "/reservations", "/menu"].includes(next) ||
-          /^\/orders\/EA-[A-Fa-f0-9]{16}$/.test(next))) {
+      const allowedDestinations = ["/", "/order", "/tracking", "/menu"];
+      if (reservationsEnabled()) allowedDestinations.push("/reservations");
+      if (
+        next &&
+        (allowedDestinations.includes(next) ||
+          /^\/orders\/EA-[A-Fa-f0-9]{16}$/.test(next))
+      ) {
         router.replace(next);
       }
     } catch (error) {

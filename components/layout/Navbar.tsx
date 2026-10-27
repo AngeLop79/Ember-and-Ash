@@ -15,14 +15,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/menu", label: "Menu" },
-  { href: "/order", label: "Ordini" },
-  { href: "/reservations", label: "Prenotazioni" },
-  { href: "/tracking", label: "Traccia ordine" },
-];
+import { reservationsEnabled } from "@/lib/features";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -38,6 +31,17 @@ export default function Navbar() {
   const accountMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDialogElement>(null);
   const mobileCloseRef = useRef<HTMLButtonElement>(null);
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/menu", label: "Menu" },
+    ...(isAuthenticated ? [{ href: "/order", label: "Ordini" }] : []),
+    ...(reservationsEnabled()
+      ? [{ href: "/reservations", label: "Prenotazioni" }]
+      : []),
+    ...(isAuthenticated
+      ? [{ href: "/tracking", label: "I miei ordini" }]
+      : []),
+  ];
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -150,7 +154,7 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <div style={{ display: "flex", gap: "28px" }} className="desktop-nav">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -166,7 +170,7 @@ export default function Navbar() {
                   paddingBottom: "2px",
                 }}
               >
-                {link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}
+                {link.label}
               </Link>
             ))}
           </div>
@@ -434,7 +438,7 @@ export default function Navbar() {
         <div className="mobile-navigation-body">
           <nav aria-label="Navigazione mobile" className="mobile-navigation-links">
             <p className="section-label">Esplora la sagra</p>
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -443,7 +447,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
               >
                 <span className="font-display">
-                  {link.href === "/tracking" && isAuthenticated ? "I miei ordini" : link.label}
+                  {link.label}
                 </span>
                 <ChevronRight size={20} aria-hidden="true" />
               </Link>

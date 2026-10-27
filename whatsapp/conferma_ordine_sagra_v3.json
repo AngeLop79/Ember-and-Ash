@@ -1,0 +1,29 @@
+{
+  "name": "conferma_ordine_sagra_v3",
+  "language": "it",
+  "category": "UTILITY",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "🐷 Ciao {{customer_name}}!\n\nLa tradizione chiama, il gusto risponde! 😊\nIl tuo ordine n. {{order_id}} è stato registrato correttamente!\n\nPuoi riaprire il tuo ordine dal pulsante qui sotto e mostrarlo direttamente in cassa al momento del ritiro! 🧾\n\n❤️ Grazie per essere dei nostri alla XIII Sagra del Maiale!",
+      "example": {
+        "body_text_named_params": [
+          { "param_name": "customer_name", "example": "Mario Rossi" },
+          { "param_name": "order_id", "example": "A-265" }
+        ]
+      }
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Visualizza ordine",
+          "url": "https://ember-and-ash-three.vercel.app/orders/{{1}}",
+          "example": ["https://ember-and-ash-three.vercel.app/orders/EA-0123456789ABCDEF"]
+        }
+      ]
+    }
+  ]
+}

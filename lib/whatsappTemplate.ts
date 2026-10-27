@@ -6,6 +6,12 @@ export const ORDER_TEMPLATE_NAMES = [
   "customer_name", "order_code", "items", "total", "order_type", "address", "status",
 ] as const;
 
+export const SAGRA_TEMPLATE_NAMES = ["customer_name", "order_id"] as const;
+
+export function sagraTemplateParameters(order: OrderDetails): string[] {
+  return [order.customer, order.publicCode].map((text) => text.replace(/\s+/g, " ").trim());
+}
+
 export function validOrderBaseUrl(value: string | undefined): boolean {
   if (!value) return false;
   try {

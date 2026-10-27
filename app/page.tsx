@@ -10,6 +10,7 @@ import {
   Star,
 } from "lucide-react";
 import { MENU_ITEMS, RESTAURANT_INFO } from "@/lib/data";
+import { reservationsEnabled } from "@/lib/features";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
 import { formatPrice } from "@/lib/utils";
@@ -148,21 +149,23 @@ export default function HomePage() {
                 Scopri il menu <ArrowRight size={18} />
               </button>
             </Link>
-            <Link href="/reservations" style={{ textDecoration: "none" }}>
-              <button
-                className="btn-ghost"
-                style={{
-                  padding: "16px 32px",
-                  borderRadius: "10px",
-                  fontSize: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <Calendar size={18} /> Prenota un tavolo
-              </button>
-            </Link>
+            {reservationsEnabled() && (
+              <Link href="/reservations" style={{ textDecoration: "none" }}>
+                <button
+                  className="btn-ghost"
+                  style={{
+                    padding: "16px 32px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <Calendar size={18} /> Prenota un tavolo
+                </button>
+              </Link>
+            )}
           </div>
           <div
             className="mobile-stack mobile-small-gap"

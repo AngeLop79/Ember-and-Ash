@@ -37,7 +37,7 @@ export default function OrderPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, subtotal, clearCart } =
     useCartStore();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, hasHydrated, refreshSession } = useAuthStore();
   const [step, setStep] = useState<Step>("cart");
   const [orderType, setOrderType] = useState<OrderType>("delivery");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
@@ -68,6 +68,12 @@ export default function OrderPage() {
 
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (hasHydrated && !isAuthenticated) {
+      router.replace("/auth?next=/order");
+    }
+  }, [hasHydrated, isAuthenticated, router]);
 
   const sub = subtotal();
   const deliveryFee = orderType === "delivery" ? calculateDeliveryFee(sub) : 0;
@@ -214,6 +220,26 @@ export default function OrderPage() {
     );
     window.open(getWhatsAppUrl(msg), "_blank");
   };
+
+  if (!hasHydrated || !isAuthenticated) {
+    return (
+      <div style={{ padding: "100px 24px" }}>
+        <p>Verifica dell’accesso in corso...</p>
+        {!hasHydrated && (
+          <button
+            className="btn-ghost"
+            onClick={() => {
+              void refreshSession().catch((error: unknown) => {
+                toast.error(error instanceof Error ? error.message : "Sessione non disponibile.");
+              });
+            }}
+          >
+            Riprova
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (step === "confirm") {
     return (

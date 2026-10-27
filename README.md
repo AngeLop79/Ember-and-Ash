@@ -17,6 +17,8 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 - Usa l'accesso staff separato per il pannello di amministrazione.
 - Gestisci gli ordini salvati, le prenotazioni e le voci del menu dall'area admin.
 
+La funzionalità di prenotazione è controllata da `NEXT_PUBLIC_RESERVATIONS_ENABLED` nel file `.env`: impostala a `false` per nascondere la prenotazione sul sito e nell'area admin e reindirizzare `/reservations` alla home. Il valore predefinito è `true`; essendo una variabile `NEXT_PUBLIC_`, le modifiche richiedono un nuovo build e deploy.
+
 ## Valuta e prezzi
 
 I prezzi sono espressi in euro e memorizzati come centesimi interi, sia nel menu sia nel database. Gli importi di esempio in naira sono stati convertiti con un tasso indicativo di 1 EUR = 1.496,85 NGN; il tasso è statico e non viene aggiornato automaticamente. Per convertire un database preesistente, applicare una volta `database/migrations/20261020_ngn_to_eur_cents.sql`: la migrazione registra la propria esecuzione e non converte di nuovo gli importi se viene rilanciata.
@@ -57,7 +59,7 @@ Il servizio Compose espone PostgreSQL solo su `127.0.0.1`. Il volume nominato co
 
 Gli account sono salvati in PostgreSQL, con password derivate tramite scrypt e salt casuale. Le sessioni durano 7 giorni: il browser riceve un cookie HttpOnly (Secure in produzione), mentre il database conserva solo l'hash del token casuale. Login e registrazione sono limitati a 10 tentativi per email ogni 15 minuti. Gli account demo precedenti non vengono importati e i relativi dati locali vengono rimossi: occorre registrarsi nuovamente.
 
-Ogni nuovo ordine richiede una sessione cliente e viene associato all'identificativo verificato dal server, mai all'email fornita nel modulo. `/tracking` mostra automaticamente **I miei ordini**, con schede responsive, dettagli, aggiornamento manuale degli stati e paginazione. Anche la ricerca di un singolo ordine associato richiede il proprietario. Gli ordini precedenti restano invariati e ricercabili per codice: non vengono attribuiti automaticamente a nessun account.
+Ogni nuovo ordine richiede una sessione cliente e viene associato all'identificativo verificato dal server, mai all'email fornita nel modulo. I collegamenti **Ordini** e **I miei ordini** e le relative pagine sono disponibili solo dopo l'accesso; dal carrello un utente non autenticato viene indirizzato al login prima del checkout. `/tracking` mostra automaticamente **I miei ordini**, con schede responsive, dettagli, aggiornamento manuale degli stati e paginazione. Anche la ricerca di un singolo ordine associato richiede il proprietario. Gli ordini precedenti restano invariati e ricercabili per codice: non vengono attribuiti automaticamente a nessun account.
 
 Le richieste di salvataggio usano una chiave di idempotenza: ripetere la stessa richiesta non crea un secondo ordine o un secondo messaggio. Il server rifiuta il riutilizzo della chiave con contenuti diversi.
 
@@ -113,12 +115,65 @@ Configurare sul server, senza prefisso `NEXT_PUBLIC_`, le variabili in `.env.exa
 - `WHATSAPP_ORDER_TEMPLATE`: nome esatto del modello Utility approvato.
 - `WHATSAPP_TEMPLATE_LANGUAGE`: lingua esatta del modello, ad esempio `it`.
 - `WHATSAPP_ORDER_TEMPLATE_VERSION`: `2` per numero breve e pulsante ordine;
+  `3` per la conferma Sagra del Maiale con due variabili e pulsante ordine;
   assente o `1` conserva il precedente modello solo testo, senza pulsante.
 - `WHATSAPP_TEMPLATE_PARAMETER_FORMAT`: `named` per il nuovo modello fornito;
   assente o `positional` per modelli con variabili numeriche.
 - `APP_BASE_URL`: origine HTTPS pubblica, ad esempio `https://nome-progetto.vercel.app`,
   senza percorso, credenziali o query. Deve coincidere con il dominio statico del
   pulsante approvato su Meta. Non usare localhost o un URL temporaneo di anteprima.
+
+### Conferma Sagra del Maiale (versione 3)
+
+Il modello [conferma_ordine_sagra_v3.json](whatsapp/conferma_ordine_sagra_v3.json)
+contiene il testo della sagra, gli esempi e il pulsante per il dominio pubblico.
+Non viene caricato automaticamente su Meta.
+
+In WhatsApp Manager creare un modello in italiano con formato variabili **Nome**,
+oppure verificare che quello gia' approvato abbia esattamente:
+
+- Nel corpo solo `{{customer_name}}` e `{{order_id}}`, in questo ordine.
+  L'app invia nome cliente e numero breve da mostrare in cassa, ad esempio `A-265`.
+- Un pulsante URL dinamico, primo pulsante (indice 0), con prefisso
+  `https://ember-and-ash-three.vercel.app/orders/` e variabile finale `{{1}}`.
+  Usare come esempio completo
+  `https://ember-and-ash-three.vercel.app/orders/EA-0123456789ABCDEF`.
+  Non usare un URL fisso come `/orders/A265`: tutti riceverebbero lo stesso link,
+  e la pagina richiede l'identificativo lungo, non il numero di cassa.
+- Nessun altro parametro dinamico, header o pulsante che richieda valori.
+
+Il JSON propone la categoria Utility; Meta puo' riclassificare il testo conviviale
+come Marketing. Usare un modello approvato e il consenso appropriato alla categoria;
+per una conferma solo transazionale, rimuovere le frasi promozionali se richiesto da Meta.
+
+Su Vercel configurare, senza prefisso `NEXT_PUBLIC_`:
+
+```dotenv
+WHATSAPP_ORDER_NOTIFICATIONS_ENABLED=true
+WHATSAPP_ORDER_TEMPLATE=conferma_ordine_sagra_v3
+WHATSAPP_ORDER_TEMPLATE_VERSION=3
+WHATSAPP_TEMPLATE_PARAMETER_FORMAT=named
+WHATSAPP_TEMPLATE_LANGUAGE=it
+APP_BASE_URL=https://ember-and-ash-three.vercel.app
+```
+
+Sostituire il nome con quello esatto del proprio modello approvato. Completare
+`WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_API_VERSION` e
+`DATABASE_URL`, poi ridistribuire. Il token deve avere il permesso
+`whatsapp_business_messaging`; il Phone Number ID non e' il numero telefonico
+ne' l'ID dell'account Business. Usare la versione Graph supportata dalla propria
+app Meta. Non condividere token o stringhe di connessione.
+
+Eseguire `npm run db:migrate` sul database Neon se non ancora inizializzato.
+Creare un ordine di prova selezionando il consenso WhatsApp e usando un numero
+con prefisso internazionale. L'invio avviene alla registrazione, non a ogni
+cambio di stato. Lo staff puo' ritentare gli invii falliti dalla gestione ordini;
+quelli gia' accettati non vengono reinviati. Con il numero di test Meta occorre
+abilitare il destinatario nella console Meta.
+
+Il pulsante usa l'identificativo lungo dell'ordine e richiede l'accesso del
+proprietario (oppure dello staff); non rende pubblici i dettagli dell'ordine.
+La configurazione v3 mantiene invariati i modelli v1 e v2.
 
 ### Modello consigliato: riepilogo_ordine_v2
 
@@ -190,6 +245,31 @@ I parametri contengono nome, codice, piatti/quantita'/importi/note, totale, moda
 La richiesta HTTP a Meta ha timeout di 8 secondi. Il database registra la notifica nella stessa transazione dell'ordine; un errore WhatsApp **non annulla l'ordine**. Il cliente vede l'esito nella conferma e nei dettagli dello storico. Nell'admin e' possibile riprovare notifiche `pending`, `failed` e `not_configured` dopo aver corretto la configurazione. Notifiche `accepted`, `sending` o `unknown` non vengono ritentate automaticamente, per evitare duplicati; se il processo si interrompe durante l'invio, verificare prima l'esito su Meta. Non e' un worker automatico: le notifiche rimaste pendenti richiedono il pulsante di recupero dello staff.
 
 `accepted` significa accettato dall'API Meta, **non consegnato al telefono**. La conferma di consegna richiederebbe un webhook Meta, non incluso. Non vengono inviati aggiornamenti WhatsApp a ogni cambio di stato.
+
+### Log diagnostici WhatsApp
+
+Ogni tentativo HTTP scrive due eventi JSON nei log server (terminale locale oppure
+Vercel → progetto → Logs, con filtro `whatsapp.request` / `whatsapp.response`):
+
+- `whatsapp.request`: ID ordine, endpoint, metodo, versione/formato del modello e
+  payload completo effettivamente inviato (destinatario, modello, lingua, parametri
+  del corpo e del pulsante).
+- `whatsapp.response`: stesso ID ordine, stato HTTP, durata in millisecondi, tipo
+  di contenuto, trace ID Meta se presente e corpo completo della risposta come
+  stringa, anche quando non e' JSON valido. Gli errori JSON di Meta includono cosi'
+  messaggio, dettagli e codice, non solo il codice salvato nel database.
+
+Il token e gli header di autenticazione non vengono registrati; eventuali occorrenze
+del token nei dati diagnostici vengono oscurate. Se non arriva una risposta (ad
+esempio timeout), viene registrato l'errore con ID ordine e messaggio, senza
+inventare un esito di consegna. Questi log non aggiungono invii o tentativi automatici.
+Il testo statico del modello resta su Meta: il payload mostra i parametri inviati,
+non un'anteprima renderizzata del messaggio.
+
+**Privacy:** i log contengono dati personali, inclusi telefono, nome e dati
+dell'ordine. Limitare accesso e conservazione nei log Vercel; non condividerli
+pubblicamente e oscurare i dati cliente prima di inviarli per assistenza.
+Non vengono salvati nuovi log nel database.
 
 Per Vercel: impostare `DATABASE_URL` e le variabili WhatsApp nei secrets del progetto, eseguire `npm run db:migrate` contro il database remoto e ridistribuire. Non esporre PostgreSQL locale su Internet.
 

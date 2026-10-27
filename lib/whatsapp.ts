@@ -3,7 +3,10 @@ import { getDb } from "@/lib/db";
 import type { NotificationStatus } from "@/lib/orderNotifications";
 import { whatsappOrderNotificationsEnabled } from "@/lib/features";
 import { getOrderDetails } from "@/lib/orders";
-import { ORDER_TEMPLATE_NAMES, orderTemplateParameters, validOrderBaseUrl } from "@/lib/whatsappTemplate";
+import {
+  ORDER_TEMPLATE_NAMES, SAGRA_TEMPLATE_NAMES, orderTemplateParameters,
+  sagraTemplateParameters, validOrderBaseUrl,
+} from "@/lib/whatsappTemplate";
 
 export async function sendOrderNotification(orderId: string): Promise<NotificationStatus | null> {
   if (!whatsappOrderNotificationsEnabled()) return null;
@@ -36,49 +39,76 @@ export async function sendOrderNotification(orderId: string): Promise<Notificati
       let errorCode: string | null = null;
       try {
         if (!/^v\d+\.\d+$/.test(config.version) || !/^\d+$/.test(config.phoneId) ||
-            !["1", "2"].includes(config.templateVersion) ||
+            !["1", "2", "3"].includes(config.templateVersion) ||
             !["named", "positional"].includes(config.parameterFormat) ||
-            (config.templateVersion === "2" && !validOrderBaseUrl(config.baseUrl))) {
+            (config.templateVersion !== "1" && !validOrderBaseUrl(config.baseUrl))) {
           status = "failed";
           errorCode = "CONFIG_INVALID";
         } else {
-          const order = config.templateVersion === "2" ? await getOrderDetails(orderId) : null;
-          if (config.templateVersion === "2" && !order) {
+          const order = config.templateVersion !== "1" ? await getOrderDetails(orderId) : null;
+          if (config.templateVersion !== "1" && !order) {
             throw new Error("Notification order not found.");
           }
-          const parameters = order ? orderTemplateParameters(order) : notification.parameters;
+          const sagra = config.templateVersion === "3";
+          const names = sagra ? SAGRA_TEMPLATE_NAMES : ORDER_TEMPLATE_NAMES;
+          const parameters = order
+            ? sagra ? sagraTemplateParameters(order) : orderTemplateParameters(order)
+            : notification.parameters;
           const components = [{
             type: "body",
             parameters: parameters.map((text, index) => ({
               type: "text", text,
-              ...(config.parameterFormat === "named" ? { parameter_name: ORDER_TEMPLATE_NAMES[index] } : {}),
+              ...(config.parameterFormat === "named" ? { parameter_name: names[index] } : {}),
             })),
           }, ...(order ? [{
             type: "button", sub_type: "url", index: "0",
             parameters: [{
               type: "text", text: order.id,
-              ...(config.parameterFormat === "named" ? { parameter_name: "order_id" } : {}),
+              ...(!sagra && config.parameterFormat === "named" ? { parameter_name: "order_id" } : {}),
             }],
           }] : [])];
+          const url = `https://graph.facebook.com/${config.version}/${config.phoneId}/messages`;
+          const payload = {
+            messaging_product: "whatsapp",
+            to: notification.recipient,
+            type: "template",
+            template: {
+              name: config.template,
+              language: { code: config.language },
+              components,
+            },
+          };
+          const startedAt = Date.now();
+          console.info(JSON.stringify({
+            event: "whatsapp.request",
+            orderId,
+            method: "POST",
+            url,
+            templateVersion: config.templateVersion,
+            parameterFormat: config.parameterFormat,
+            payload,
+          }).replaceAll(config.token, "[REDACTED]"));
           const response = await fetch(
-            `https://graph.facebook.com/${config.version}/${config.phoneId}/messages`,
+            url,
             {
               method: "POST",
               headers: { Authorization: `Bearer ${config.token}`, "Content-Type": "application/json" },
               signal: AbortSignal.timeout(8000),
-              body: JSON.stringify({
-                messaging_product: "whatsapp",
-                to: notification.recipient,
-                type: "template",
-                template: {
-                  name: config.template,
-                  language: { code: config.language },
-                  components,
-                },
-              }),
+              body: JSON.stringify(payload),
             },
           );
-          const result = await response.json();
+          const responseBody = await response.text();
+          console.info(JSON.stringify({
+            event: "whatsapp.response",
+            orderId,
+            httpStatus: response.status,
+            statusText: response.statusText,
+            durationMs: Date.now() - startedAt,
+            contentType: response.headers.get("content-type"),
+            traceId: response.headers.get("x-fb-trace-id"),
+            body: responseBody,
+          }).replaceAll(config.token, "[REDACTED]"));
+          const result = JSON.parse(responseBody);
           if (response.ok && typeof result.messages?.[0]?.id === "string") {
             status = "accepted";
             messageId = result.messages[0].id;
@@ -90,7 +120,12 @@ export async function sendOrderNotification(orderId: string): Promise<Notificati
         }
       } catch (error) {
         errorCode = error instanceof Error ? error.name : "NETWORK_ERROR";
-        console.error("WhatsApp request outcome is unknown.", { orderId, errorCode });
+        console.error("WhatsApp request outcome is unknown.", {
+          orderId,
+          errorCode,
+          errorMessage: (error instanceof Error ? error.message : String(error))
+            .replaceAll(config.token, "[REDACTED]"),
+        });
       }
       await db.query(
         `UPDATE order_notifications SET status = $2, provider_message_id = $3,

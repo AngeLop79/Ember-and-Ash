@@ -21,6 +21,7 @@ import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { notificationMessage, type NotificationStatus } from "@/lib/orderNotifications";
 import { useFeatureStore } from "@/store/featureStore";
+import { reservationsEnabled } from "@/lib/features";
 
 type AdminTab = "overview" | "orders" | "reservations" | "menu";
 
@@ -127,6 +128,7 @@ const ORDER_TYPE_LABELS: Record<string, string> = {
 
 export default function AdminDashboard() {
   const whatsappEnabled = useFeatureStore((state) => state.whatsappOrderNotifications);
+  const bookingEnabled = reservationsEnabled();
   const router = useRouter();
   const [tab, setTab] = useState<AdminTab>("overview");
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -248,12 +250,14 @@ export default function AdminDashboard() {
       icon: <ShoppingBag size={16} />,
       badge: activeOrders,
     },
-    {
-      id: "reservations",
-      label: "Prenotazioni",
-      icon: <Calendar size={16} />,
-      badge: reservations.filter((r) => r.status === "pending").length,
-    },
+    ...(bookingEnabled
+      ? [{
+          id: "reservations" as const,
+          label: "Prenotazioni",
+          icon: <Calendar size={16} />,
+          badge: reservations.filter((r) => r.status === "pending").length,
+        }]
+      : []),
     { id: "menu", label: "Piatti del menu", icon: <ChefHat size={16} /> },
   ] as const;
 
@@ -498,13 +502,15 @@ export default function AdminDashboard() {
                   color: "#E8541A",
                   sub: `${pendingOrders} in attesa di un’azione`,
                 },
-                {
-                  label: "Prenotazioni di oggi",
-                  value: todayReservations,
-                  icon: <Calendar size={20} />,
-                  color: "#60A5FA",
-                  sub: `${reservations.filter((r) => r.status === "pending").length} in attesa di conferma`,
-                },
+                ...(bookingEnabled
+                  ? [{
+                      label: "Prenotazioni di oggi",
+                      value: todayReservations,
+                      icon: <Calendar size={20} />,
+                      color: "#60A5FA",
+                      sub: `${reservations.filter((r) => r.status === "pending").length} in attesa di conferma`,
+                    }]
+                  : []),
                 {
                   label: "Clienti totali",
                   value: orders.length,
@@ -1071,7 +1077,7 @@ export default function AdminDashboard() {
         )}
 
         {/* RESERVATIONS TAB */}
-        {tab === "reservations" && (
+        {bookingEnabled && tab === "reservations" && (
           <div className="page-enter">
             <h2
               className="font-display"
