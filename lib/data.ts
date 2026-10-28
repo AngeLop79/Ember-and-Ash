@@ -60,6 +60,20 @@ export const MENU_ITEMS: MenuItem[] = [
   },
   {
   id: "9",
+  name: "Costine di maiale al forno",
+  description:
+    "Costine di maiale cotte al forno, tenere e saporite, accompagnate da verdure ",
+  price: 802,
+  category: "grills",
+    image: "/images/menu/costine.jpg",
+  tags: ["premium"],
+  available: true,
+  featured: false,
+  spiceLevel: 1,
+  prepTime: 25,
+},
+  {
+  id: "13",
   name: "Birra alla spina",
   description: "Birra fresca, spillata al momento",
   price: 300,
@@ -98,21 +112,6 @@ export const MENU_ITEMS: MenuItem[] = [
   spiceLevel: 0,
   prepTime: 1,
 },
-  {
-    id: "13",
-    name: "Costolette di maiale alla griglia",
-    description:
-      "Costolette di maiale , servite con contorno di verdure grigliate e patate al forno",
-    price: 802,
-    category: "grills",
-    image:
-      "https://tse4.mm.bing.net/th/id/OIP.j27h9uzQHuHa1YOl4Fzw9wHaLH?rs=1&pid=ImgDetMain&o=7&rm=3",
-    tags: ["premium", "grill"],
-    available: true,
-    featured: false,
-    spiceLevel: 1,
-    prepTime: 25,
-  }
 ];
 
 export const TIMES = [

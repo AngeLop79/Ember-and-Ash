@@ -171,7 +171,7 @@ export default function Cart() {
                 width: "100%", padding: "14px", borderRadius: "10px",
                 fontSize: "15px", fontWeight: 600, marginBottom: "10px",
               }}>
-                Vai al pagamento — {formatPrice(total)}
+                Vai all'ordine — {formatPrice(total)}
               </button>
             </Link>
 

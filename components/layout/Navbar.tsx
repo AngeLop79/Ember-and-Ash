@@ -136,23 +136,19 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
+            className="site-brand"
             style={{
               textDecoration: "none",
               display: "flex",
               alignItems: "center",
               gap: "8px",
+              minWidth: 0,
             }}
           >
             <Flame size={22} color="#E8541A" />
-            <span
-              className="font-display logo-text"
-              style={{
-                fontWeight: 700,
-                color: "#F5EDD8",
-                letterSpacing: "0.01em",
-              }}
-            >
-              XIII° Sagra del Maiale
+            <span className="site-brand-copy">
+              <span className="font-display logo-text">XIII Sagra del Maiale</span>
+              <span className="site-brand-organizer">I Ragazzi del Sole</span>
             </span>
           </Link>
 
@@ -307,7 +303,7 @@ export default function Navbar() {
                       }}
                     >
                       <Link
-                        href="/auth"
+                        href="/auth?mode=signup"
                         onClick={() => setAccountOpen(false)}
                         style={{
                           textDecoration: "none",
@@ -426,7 +422,10 @@ export default function Navbar() {
         <div className="mobile-navigation-header">
           <Link href="/" className="mobile-navigation-brand" onClick={() => setMobileOpen(false)}>
             <Flame size={22} color="#E8541A" aria-hidden="true" />
-            <span className="font-display logo-text">XIII° Sagra del Maiale</span>
+            <span className="site-brand-copy">
+              <span className="font-display logo-text">XIII Sagra del Maiale</span>
+              <span className="site-brand-organizer">I Ragazzi del Sole</span>
+            </span>
           </Link>
           <button
             ref={mobileCloseRef}
@@ -484,7 +483,7 @@ export default function Navbar() {
                 <Link href="/auth" className="mobile-navigation-action mobile-navigation-login" onClick={() => setMobileOpen(false)}>
                   Accedi <ChevronRight size={18} aria-hidden="true" />
                 </Link>
-                <Link href="/auth" className="mobile-navigation-register" onClick={() => setMobileOpen(false)}>
+                <Link href="/auth?mode=signup" className="mobile-navigation-register" onClick={() => setMobileOpen(false)}>
                   Crea un nuovo account <ChevronRight size={16} aria-hidden="true" />
                 </Link>
               </div>
@@ -494,7 +493,21 @@ export default function Navbar() {
       </dialog>
 
       <style>{`
-        .logo-text { font-size: 20px; }
+        .logo-text { font-size: 19px; line-height: 1; }
+        .site-brand-copy {
+          display: flex;
+          min-width: 0;
+          flex-direction: column;
+          gap: 3px;
+        }
+        .site-brand-organizer {
+          color: #8A7566;
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.11em;
+          line-height: 1.2;
+          text-transform: uppercase;
+        }
         .site-navbar {
           background: rgba(26,22,18,0.92);
           backdrop-filter: blur(20px);
@@ -648,6 +661,8 @@ export default function Navbar() {
         }
 
         @media (max-width: 768px) {
+          .site-brand-organizer { display: none; }
+          .logo-text { font-size: 17px; }
           .site-navbar { background: var(--ash); backdrop-filter: none; }
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: flex !important; }

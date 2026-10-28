@@ -28,10 +28,14 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { useFeatureStore } from "@/store/featureStore";
 import { italianPhoneDigits, normalizeItalianPhone } from "@/lib/phone";
+import {
+  ENABLED_ORDER_TYPES,
+  ENABLED_PAYMENT_METHODS,
+  type OrderType,
+  type PaymentMethod,
+} from "@/lib/orderConfig";
 
 type Step = "cart" | "details" | "payment" | "confirm";
-type OrderType = "delivery" | "pickup" | "dine-in";
-type PaymentMethod = "card" | "cash" | "transfer";
 
 export default function OrderPage() {
   const whatsappEnabled = useFeatureStore((state) => state.whatsappOrderNotifications);
@@ -40,8 +44,12 @@ export default function OrderPage() {
     useCartStore();
   const { user, isAuthenticated, hasHydrated, refreshSession } = useAuthStore();
   const [step, setStep] = useState<Step>("cart");
-  const [orderType, setOrderType] = useState<OrderType>("delivery");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [orderType, setOrderType] = useState<OrderType>(
+    ENABLED_ORDER_TYPES[0] ?? "pickup",
+  );
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+    ENABLED_PAYMENT_METHODS[0] ?? "cash",
+  );
   const [customer, setCustomer] = useState<CustomerInfo>({
     name: "",
     phone: "",
@@ -96,6 +104,50 @@ export default function OrderPage() {
     ? RESTAURANT_INFO.closingHour.weekend
     : RESTAURANT_INFO.closingHour.weekday;
   const isRestaurantClosed = currentLagosHour >= closingHour;
+  const showPaymentStep =
+    ENABLED_PAYMENT_METHODS.length > 1 || paymentMethod !== "cash";
+  const orderTypeOptions: {
+    val: OrderType;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      val: "delivery",
+      label: "Consegna a domicilio",
+      icon: <Truck size={16} />,
+    },
+    { val: "pickup", label: "Ritiro", icon: <MapPin size={16} /> },
+    {
+      val: "dine-in",
+      label: "Consumo al ristorante",
+      icon: <ShoppingBag size={16} />,
+    },
+  ];
+  const paymentOptions: {
+    val: PaymentMethod;
+    label: string;
+    sub: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      val: "card",
+      label: "Carta di debito o credito",
+      sub: "Visa, Mastercard, Verve",
+      icon: <CreditCard size={20} />,
+    },
+    {
+      val: "transfer",
+      label: "Bonifico bancario",
+      sub: "GTBank, Access, UBA",
+      icon: <Banknote size={20} />,
+    },
+    {
+      val: "cash",
+      label: "Pagamento alla consegna/ritiro",
+      sub: "Contanti alla consegna o al ritiro",
+      icon: <Banknote size={20} />,
+    },
+  ];
 
   const guardWhatsAppAccess = () => {
     if (isAuthenticated) return true;
@@ -372,7 +424,11 @@ export default function OrderPage() {
           className="mobile-stack mobile-small-gap order-steps"
           style={{ display: "flex", gap: "0", marginBottom: "40px" }}
         >
-          {(["cart", "details", "payment"] as Step[]).map((s, i) => {
+          {(
+            showPaymentStep
+              ? (["cart", "details", "payment"] as Step[])
+              : (["cart", "details"] as Step[])
+          ).map((s, i, steps) => {
             const labels: Record<Step, string> = {
               cart: "Carrello",
               details: "Dati",
@@ -389,7 +445,7 @@ export default function OrderPage() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  flex: i < 2 ? "1" : "auto",
+                  flex: i < steps.length - 1 ? "1" : "auto",
                 }}
               >
                 <div
@@ -427,7 +483,7 @@ export default function OrderPage() {
                     {labels[s]}
                   </span>
                 </div>
-                {i < 2 && (
+                {i < steps.length - 1 && (
                   <div
                     style={{
                       flex: 1,
@@ -493,81 +549,68 @@ export default function OrderPage() {
                 ) : (
                   <div>
                     {/* Order type */}
-                    <div
-                      className="card"
-                      style={{ padding: "20px", marginBottom: "20px" }}
-                    >
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          color: "#F5EDD8",
-                          marginBottom: "12px",
-                          letterSpacing: "0.06em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Tipo di ordine
-                      </p>
+                    {ENABLED_ORDER_TYPES.length > 1 && (
                       <div
-                        className="order-type-options"
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          flexWrap: "wrap",
-                        }}
+                        className="card"
+                        style={{ padding: "20px", marginBottom: "20px" }}
                       >
-                        {(
-                          [
-                            {
-                              val: "delivery",
-                              label: "Consegna a domicilio",
-                              icon: <Truck size={16} />,
-                            },
-                            {
-                              val: "pickup",
-                              label: "Ritiro",
-                              icon: <MapPin size={16} />,
-                            },
-                            {
-                              val: "dine-in",
-                              label: "Consumo al ristorante",
-                              icon: <ShoppingBag size={16} />,
-                            },
-                          ] as {
-                            val: OrderType;
-                            label: string;
-                            icon: React.ReactNode;
-                          }[]
-                        ).map(({ val, label, icon }) => (
-                          <button
-                            key={val}
-                            onClick={() => setOrderType(val)}
-                            className="order-type-btn"
-                            style={{
-                              padding: "10px 20px",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              fontSize: "14px",
-                              fontWeight: 600,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              transition: "all 0.2s",
-                              background:
-                                orderType === val ? "#E8541A" : "transparent",
-                              border:
-                                orderType === val
-                                  ? "none"
-                                  : "1px solid #3D3028",
-                              color: orderType === val ? "white" : "#8A7566",
-                            }}
-                          >
-                            {icon} {label}
-                          </button>
-                        ))}
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            color: "#F5EDD8",
+                            marginBottom: "12px",
+                            letterSpacing: "0.06em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Tipo di ordine
+                        </p>
+                        <div
+                          className="order-type-options"
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          {orderTypeOptions
+                            .filter(({ val }) =>
+                              ENABLED_ORDER_TYPES.includes(val),
+                            )
+                            .map(({ val, label, icon }) => (
+                              <button
+                                key={val}
+                                onClick={() => setOrderType(val)}
+                                className="order-type-btn"
+                                style={{
+                                  padding: "10px 20px",
+                                  borderRadius: "8px",
+                                  cursor: "pointer",
+                                  fontSize: "14px",
+                                  fontWeight: 600,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  transition: "all 0.2s",
+                                  background:
+                                    orderType === val
+                                      ? "#E8541A"
+                                      : "transparent",
+                                  border:
+                                    orderType === val
+                                      ? "none"
+                                      : "1px solid #3D3028",
+                                  color:
+                                    orderType === val ? "white" : "#8A7566",
+                                }}
+                              >
+                                {icon} {label}
+                              </button>
+                            ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Items */}
                     <div
@@ -925,6 +968,18 @@ export default function OrderPage() {
                     </div>
                   )}
                 </div>
+                {!showPaymentStep && isRestaurantClosed && (
+                  <p
+                    role="status"
+                    style={{
+                      color: "#D4A843",
+                      fontSize: "13px",
+                      marginTop: "20px",
+                    }}
+                  >
+                    Per oggi siamo chiusi. Riprova durante gli orari di apertura.
+                  </p>
+                )}
                 <div
                   className="order-action-row"
                   style={{ display: "flex", gap: "12px", marginTop: "24px" }}
@@ -950,22 +1005,37 @@ export default function OrderPage() {
                         toast.error("Inserisci l’indirizzo di consegna");
                         return;
                       }
-                      setStep("payment");
+                      if (showPaymentStep) {
+                        setStep("payment");
+                      } else {
+                        void handlePlaceOrder();
+                      }
                     }}
+                    disabled={
+                      !showPaymentStep && (isRestaurantClosed || loading)
+                    }
                     className="btn-ember"
                     style={{
                       padding: "12px 32px",
                       borderRadius: "10px",
                       fontSize: "14px",
+                      opacity:
+                        !showPaymentStep && (isRestaurantClosed || loading)
+                          ? 0.6
+                          : 1,
                     }}
                   >
-                    Continua →
+                    {showPaymentStep
+                      ? "Continua →"
+                      : loading
+                        ? "Salvataggio dell’ordine..."
+                        : "Invia l’ordine"}
                   </button>
                 </div>
               </div>
             )}
 
-            {step === "payment" && (
+            {step === "payment" && showPaymentStep && (
               <div className="card" style={{ padding: "28px" }}>
                 <p
                   style={{
@@ -977,105 +1047,88 @@ export default function OrderPage() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Metodo di pagamento
+                  {ENABLED_PAYMENT_METHODS.length > 1
+                    ? "Metodo di pagamento"
+                    : "Completa il pagamento"}
                 </p>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                    marginBottom: "24px",
-                  }}
-                >
-                  {(
-                    [
-                      {
-                        val: "card",
-                        label: "Carta di debito o credito",
-                        sub: "Visa, Mastercard, Verve",
-                        icon: <CreditCard size={20} />,
-                      },
-                      {
-                        val: "transfer",
-                        label: "Bonifico bancario",
-                        sub: "GTBank, Access, UBA",
-                        icon: <Banknote size={20} />,
-                      },
-                      {
-                        val: "cash",
-                        label: "Pagamento alla consegna",
-                        sub: "Contanti alla consegna",
-                        icon: <Banknote size={20} />,
-                      },
-                    ] as {
-                      val: PaymentMethod;
-                      label: string;
-                      sub: string;
-                      icon: React.ReactNode;
-                    }[]
-                  ).map(({ val, label, sub, icon }) => (
-                    <button
-                      key={val}
-                      onClick={() => setPaymentMethod(val)}
-                      style={{
-                        padding: "16px 20px",
-                        borderRadius: "10px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        border:
-                          paymentMethod === val
-                            ? "1px solid #E8541A"
-                            : "1px solid #3D3028",
-                        background:
-                          paymentMethod === val
-                            ? "rgba(232,84,26,0.08)"
-                            : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        transition: "all 0.2s",
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: paymentMethod === val ? "#E8541A" : "#8A7566",
-                        }}
-                      >
-                        {icon}
-                      </span>
-                      <div>
-                        <p
+                {ENABLED_PAYMENT_METHODS.length > 1 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                      marginBottom: "24px",
+                    }}
+                  >
+                    {paymentOptions
+                      .filter(({ val }) =>
+                        ENABLED_PAYMENT_METHODS.includes(val),
+                      )
+                      .map(({ val, label, sub, icon }) => (
+                        <button
+                          key={val}
+                          onClick={() => setPaymentMethod(val)}
                           style={{
-                            fontWeight: 600,
-                            fontSize: "14px",
-                            color: "#F5EDD8",
-                            marginBottom: "2px",
+                            padding: "16px 20px",
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            border:
+                              paymentMethod === val
+                                ? "1px solid #E8541A"
+                                : "1px solid #3D3028",
+                            background:
+                              paymentMethod === val
+                                ? "rgba(232,84,26,0.08)"
+                                : "transparent",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "16px",
+                            transition: "all 0.2s",
                           }}
                         >
-                          {label}
-                        </p>
-                        <p style={{ fontSize: "12px", color: "#8A7566" }}>
-                          {sub}
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          marginLeft: "auto",
-                          width: "18px",
-                          height: "18px",
-                          borderRadius: "50%",
-                          border:
-                            paymentMethod === val
-                              ? "none"
-                              : "2px solid #3D3028",
-                          background:
-                            paymentMethod === val ? "#E8541A" : "transparent",
-                          flexShrink: 0,
-                        }}
-                      />
-                    </button>
-                  ))}
-                </div>
+                          <span
+                            style={{
+                              color:
+                                paymentMethod === val ? "#E8541A" : "#8A7566",
+                            }}
+                          >
+                            {icon}
+                          </span>
+                          <div>
+                            <p
+                              style={{
+                                fontWeight: 600,
+                                fontSize: "14px",
+                                color: "#F5EDD8",
+                                marginBottom: "2px",
+                              }}
+                            >
+                              {label}
+                            </p>
+                            <p style={{ fontSize: "12px", color: "#8A7566" }}>
+                              {sub}
+                            </p>
+                          </div>
+                          <div
+                            style={{
+                              marginLeft: "auto",
+                              width: "18px",
+                              height: "18px",
+                              borderRadius: "50%",
+                              border:
+                                paymentMethod === val
+                                  ? "none"
+                                  : "2px solid #3D3028",
+                              background:
+                                paymentMethod === val ? "#E8541A" : "transparent",
+                              flexShrink: 0,
+                            }}
+                          />
+                        </button>
+                      ))}
+                  </div>
+                )}
 
                 {paymentMethod === "card" && (
                   <div
@@ -1501,29 +1554,27 @@ export default function OrderPage() {
                   {formatPrice(sub)}
                 </span>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "14px",
-                }}
-              >
-                <span style={{ fontSize: "13px", color: "#8A7566" }}>
-                  Consegna {orderType !== "delivery" && "(non disponibile)"}
-                </span>
-                <span
+              {orderType === "delivery" && (
+                <div
                   style={{
-                    fontSize: "13px",
-                    color: deliveryFee === 0 ? "#D4A843" : "#F5EDD8",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "14px",
                   }}
                 >
-                  {orderType !== "delivery"
-                    ? "—"
-                    : deliveryFee === 0
-                      ? "Gratuita"
-                      : formatPrice(deliveryFee)}
-                </span>
-              </div>
+                  <span style={{ fontSize: "13px", color: "#8A7566" }}>
+                    Consegna
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      color: deliveryFee === 0 ? "#D4A843" : "#F5EDD8",
+                    }}
+                  >
+                    {deliveryFee === 0 ? "Gratuita" : formatPrice(deliveryFee)}
+                  </span>
+                </div>
+              )}
               <div className="divider" style={{ marginBottom: "12px" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 700, color: "#F5EDD8" }}>Totale</span>

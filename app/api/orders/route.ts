@@ -10,17 +10,20 @@ import { sendOrderNotification } from "@/lib/whatsapp";
 import { notificationMessage } from "@/lib/orderNotifications";
 import { whatsappOrderNotificationsEnabled } from "@/lib/features";
 import { normalizeItalianPhone } from "@/lib/phone";
+import {
+  isEnabledOrderType,
+  isEnabledPaymentMethod,
+  type OrderType,
+  type PaymentMethod,
+} from "@/lib/orderConfig";
 
 export const runtime = "nodejs";
-
-const ORDER_TYPES = ["delivery", "pickup", "dine-in"] as const;
-const PAYMENT_METHODS = ["card", "cash", "transfer"] as const;
 
 type OrderRequest = {
   items: { id: string; quantity: number; notes?: string }[];
   customer: CustomerInfo;
-  type: (typeof ORDER_TYPES)[number];
-  paymentMethod: (typeof PAYMENT_METHODS)[number];
+  type: OrderType;
+  paymentMethod: PaymentMethod;
   whatsappConsent: boolean;
 };
 
@@ -36,8 +39,8 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
     !Array.isArray(items) ||
     items.length === 0 ||
     items.length > 30 ||
-    !ORDER_TYPES.includes(type as OrderRequest["type"]) ||
-    !PAYMENT_METHODS.includes(paymentMethod as OrderRequest["paymentMethod"]) ||
+    !isEnabledOrderType(type) ||
+    !isEnabledPaymentMethod(paymentMethod) ||
     (value.whatsappConsent !== undefined && typeof value.whatsappConsent !== "boolean")
   ) {
     return null;
@@ -88,8 +91,8 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
   return {
     items: normalizedItems,
     customer: { name: customerName, phone: normalizedPhone, email, address },
-    type: type as OrderRequest["type"],
-    paymentMethod: paymentMethod as OrderRequest["paymentMethod"],
+    type,
+    paymentMethod,
     whatsappConsent: value.whatsappConsent === true,
   };
 }

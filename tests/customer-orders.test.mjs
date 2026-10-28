@@ -74,6 +74,22 @@ test("customer accounts, ownership, pagination, idempotence and session revocati
     assert.equal(response.status, 401);
     response = await place(a.cookie, randomUUID(), { ...body, whatsappConsent: true, customer: { ...body.customer, phone: "123" } });
     assert.equal(response.status, 400);
+    if (process.env.NEXT_PUBLIC_ORDER_DELIVERY_ENABLED !== "true") {
+      response = await place(a.cookie, randomUUID(), {
+        ...body,
+        type: "delivery",
+        customer: { ...body.customer, address: "Via di prova 1" },
+      });
+      assert.equal(response.status, 400);
+    }
+    if (process.env.NEXT_PUBLIC_ORDER_DINE_IN_ENABLED !== "true") {
+      response = await place(a.cookie, randomUUID(), { ...body, type: "dine-in" });
+      assert.equal(response.status, 400);
+    }
+    if (process.env.NEXT_PUBLIC_ORDER_PAYMENT_CARD_ENABLED !== "true") {
+      response = await place(a.cookie, randomUUID(), { ...body, paymentMethod: "card" });
+      assert.equal(response.status, 400);
+    }
     const responses = await Promise.all([place(a.cookie), place(a.cookie), place(a.cookie)]);
     assert.deepEqual(responses.map((r) => r.status).sort(), [200, 200, 201]);
     const orders = await Promise.all(responses.map((r) => r.json()));
@@ -82,6 +98,7 @@ test("customer accounts, ownership, pagination, idempotence and session revocati
     assert.match(order.publicCode, /^A-\d{3,}$/);
     assert.ok(orders.every((o) => o.publicCode === order.publicCode));
     assert.equal(order.total, 2000);
+    assert.equal(order.deliveryFee, 0);
     if (whatsappEnabled) assert.match(order.notification, /non richiesto/);
     else assert.equal(order.notification, undefined);
     const stored = await pool.query("SELECT customer_id, whatsapp_consent_at FROM orders WHERE id = $1", [order.id]);

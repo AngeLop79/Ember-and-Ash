@@ -93,31 +93,25 @@ export default function HomePage() {
           <p className="section-label " style={{marginTop: "13px", marginBottom: "24px" }}>
             🔥 Le ordinazioni sono aperte!
           </p>
-          <h1
-            className="font-display mobile-title"
-            style={{
-              fontSize: "clamp(44px, 10vw, 96px)",
-              fontWeight: 900,
-              lineHeight: 1.1,
-              color: "#F5EDD8",
-              marginBottom: "4px",
-            }}
-          >
-            XIII° Sagra del Maiale
+          <h1 className="font-display home-event-title" style={{ color: "#F5EDD8" }}>
+            XIII Sagra del Maiale
           </h1>
-          <h1
-            className="font-display mobile-title"
+          <p className="home-organizer" style={{ marginTop: "18px" }}>
+            Associazione I Ragazzi del Sole
+          </p>
+          <p
+            className="font-display"
             style={{
-              fontSize: "clamp(44px, 10vw, 96px)",
-              fontWeight: 900,
-              lineHeight: 1.1,
+              fontSize: "clamp(24px, 4vw, 40px)",
+              fontWeight: 700,
+              lineHeight: 1.12,
               color: "#E8541A",
-              marginBottom: "28px",
-              fontStyle: "italic",
+              marginTop: "18px",
+              marginBottom: "24px",
             }}
           >
             I sapori della tradizione
-          </h1>
+          </p>
           <p
             className="mobile-subtitle"
             style={{
@@ -125,7 +119,7 @@ export default function HomePage() {
               color: "#8A7566",
               maxWidth: "480px",
               lineHeight: "1.7",
-              marginBottom: "48px",
+              marginBottom: "40px",
             }}
           >
             La tradizione calabrese, il gusto della cucina contadina e il profumo del maiale alla brace: una festa di sapori autentici e convivialità, nel cuore della nostra comunità.
