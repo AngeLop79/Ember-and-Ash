@@ -14,6 +14,7 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 - Su mobile, naviga da un menu a schermo intero con sfondo opaco, scorrimento interno e accesso al profilo. Si chiude dal pulsante dedicato, con Esc o selezionando un collegamento; il focus resta nel menu e lo scorrimento della pagina sottostante viene bloccato.
 - La barra di navigazione mobile ha uno sfondo opaco che copre anche l'area sicura superiore del dispositivo; il contenuto pubblico tiene conto dello stesso spazio.
 - Ricevi il riepilogo ordine via WhatsApp Business Platform, con consenso facoltativo e configurazione Meta.
+- Accedi con email e password oppure con Google; il telefono italiano è obbligatorio per usare l'account.
 - Usa l'accesso staff separato per il pannello di amministrazione.
 - Gestisci gli ordini salvati, le prenotazioni e le voci del menu dall'area admin.
 
@@ -58,6 +59,12 @@ Il servizio Compose espone PostgreSQL solo su `127.0.0.1`. Il volume nominato co
 ## Account clienti e storico
 
 Gli account sono salvati in PostgreSQL, con password derivate tramite scrypt e salt casuale. Le sessioni durano 7 giorni: il browser riceve un cookie HttpOnly (Secure in produzione), mentre il database conserva solo l'hash del token casuale. Login e registrazione sono limitati a 10 tentativi per email ogni 15 minuti. Gli account demo precedenti non vengono importati e i relativi dati locali vengono rimossi: occorre registrarsi nuovamente.
+
+Il login Google usa OAuth con PKCE. In Google Cloud Console crea un client OAuth di tipo **Applicazione web** e aggiungi come URI di reindirizzamento autorizzato il valore esatto di `GOOGLE_REDIRECT_URI` (per esempio `http://localhost:3000/api/auth/google/callback` in locale e l'URL HTTPS del sito in produzione). Configura `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` nei secret dell'ambiente; non esporre il secret al browser. Gli account vengono collegati per email solo se Google la dichiara verificata. Chi accede con Google deve completare il profilo aggiungendo il telefono prima di usare ordini e storico.
+
+Il telefono è obbligatorio e viene normalizzato con prefisso italiano fisso `+39`. Per account esistenti senza un numero valido viene richiesto di completare il profilo al prossimo accesso alle funzioni account. Applica la migrazione Google insieme alle altre modifiche al database con `npm run db:migrate`.
+
+Quando `WHATSAPP_ORDER_NOTIFICATIONS_ENABLED=true` e la configurazione server è completa, la casella per inviare il riepilogo dell'ordine su WhatsApp è preselezionata al checkout; il cliente può deselezionarla. La configurazione server resta necessaria e non viene aggirata dal flag selezionato nel browser.
 
 Ogni nuovo ordine richiede una sessione cliente e viene associato all'identificativo verificato dal server, mai all'email fornita nel modulo. I collegamenti **Ordini** e **I miei ordini** e le relative pagine sono disponibili solo dopo l'accesso; dal carrello un utente non autenticato viene indirizzato al login prima del checkout. `/tracking` mostra automaticamente **I miei ordini**, con schede responsive, dettagli, aggiornamento manuale degli stati e paginazione. Anche la ricerca di un singolo ordine associato richiede il proprietario. Gli ordini precedenti restano invariati e ricercabili per codice: non vengono attribuiti automaticamente a nessun account.
 

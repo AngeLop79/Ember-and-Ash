@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { reservationsEnabled } from "@/lib/features";
+import { normalizeItalianPhone } from "@/lib/phone";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -25,6 +26,9 @@ export default function Navbar() {
     isAuthenticated,
     signOut,
   } = useAuthStore();
+  const profileComplete = isAuthenticated && Boolean(
+    user?.phone && normalizeItalianPhone(user.phone),
+  );
   const count = itemCount();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -34,11 +38,11 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/menu", label: "Menu" },
-    ...(isAuthenticated ? [{ href: "/order", label: "Ordini" }] : []),
+    ...(profileComplete ? [{ href: "/order", label: "Ordini" }] : []),
     ...(reservationsEnabled()
       ? [{ href: "/reservations", label: "Prenotazioni" }]
       : []),
-    ...(isAuthenticated
+    ...(profileComplete
       ? [{ href: "/tracking", label: "I miei ordini" }]
       : []),
   ];
@@ -209,7 +213,7 @@ export default function Navbar() {
                 <span suppressHydrationWarning>
                   {isAuthenticated && user?.name
                     ? user.name.split(" ")[0]
-                    : "Profilo"}
+                    : "Accedi"}
                 </span>
               </button>
 

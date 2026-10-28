@@ -1,5 +1,6 @@
 import { getCustomer } from "@/lib/customerAuth";
 import { getDb } from "@/lib/db";
+import { normalizeItalianPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "no-store" };
@@ -8,6 +9,7 @@ export async function GET(request: Request) {
   try {
     const user = await getCustomer();
     if (!user) return Response.json({ error: "Accedi per vedere i tuoi ordini." }, { status: 401, headers });
+    if (!normalizeItalianPhone(user.phone)) return Response.json({ error: "Completa il profilo per vedere i tuoi ordini." }, { status: 403, headers });
     const before = new URL(request.url).searchParams.get("before");
     let cursor: { time: string; id: string } | null = null;
     if (before) {

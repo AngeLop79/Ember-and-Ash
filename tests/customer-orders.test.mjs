@@ -22,15 +22,31 @@ test("customer accounts, ownership, pagination, idempotence and session revocati
   });
   try {
     for (const email of emails) {
-      const response = await postAuth({ mode: "signup", name: "Customer Integration Test", email, password: "Long-test-password-123" });
+      const response = await postAuth({ mode: "signup", name: "Customer Integration Test", email, phone: "3201234567", password: "Long-test-password-123" });
       assert.equal(response.status, 201);
       const { user } = await response.json();
       assert.equal(user.password_hash, undefined);
+      assert.equal(user.phone, "+393201234567");
       const setCookie = response.headers.get("set-cookie");
       assert.match(setCookie, /HttpOnly/i);
       users.push({ ...user, cookie: setCookie.split(";")[0] });
     }
+    const invalidPhone = await postAuth({
+      mode: "signup",
+      name: "Customer Integration Test",
+      email: `invalid-phone-${suffix}@example.invalid`,
+      phone: "123",
+      password: "Long-test-password-123",
+    });
+    assert.equal(invalidPhone.status, 400);
     const [a, b] = users;
+    const profileUpdate = await fetch(`${base}/api/auth`, {
+      method: "PATCH",
+      headers: { ...headers, Cookie: a.cookie },
+      body: JSON.stringify({ phone: "+39 333 765 4321" }),
+    });
+    assert.equal(profileUpdate.status, 200);
+    assert.equal((await profileUpdate.json()).user.phone, "+393337654321");
     const featureResponse = await fetch(`${base}/api/features`);
     const whatsappEnabled = (await featureResponse.json()).whatsappOrderNotifications;
     assert.equal(typeof whatsappEnabled, "boolean");

@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getCustomer } from "@/lib/customerAuth";
+import { normalizeItalianPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,9 @@ export async function GET(
   let result;
   try {
     const user = await getCustomer();
+    if (user && !normalizeItalianPhone(user.phone)) {
+      return Response.json({ error: "Completa il profilo per consultare l'ordine." }, { status: 403 });
+    }
     result = await getDb().query(
       `SELECT o.id, o.order_type, o.status,
         COALESCE(

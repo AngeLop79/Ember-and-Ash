@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
-import { reservationsEnabled } from "@/lib/features";
+import { safeAuthDestination } from "@/lib/authRedirect";
+import { italianPhoneDigits, normalizeItalianPhone } from "@/lib/phone";
 
 type AuthMode = "signin" | "signup";
 
@@ -28,6 +29,17 @@ export default function AuthPage() {
     password: "",
     confirmPassword: "",
   });
+  const [profilePhone, setProfilePhone] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
+
+  useEffect(() => {
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (error === "google_config") {
+      toast.error("Accesso Google non configurato sul server.");
+    } else if (error) {
+      toast.error("Accesso Google non riuscito. Riprova.");
+    }
+  }, []);
 
   const authenticate = async (mode: AuthMode) => {
     setLoading(true);
@@ -37,7 +49,12 @@ export default function AuthPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode,
-          ...(mode === "signup" ? signupForm : signinForm),
+          ...(mode === "signup"
+            ? {
+                ...signupForm,
+                phone: normalizeItalianPhone(signupForm.phone),
+              }
+            : signinForm),
         }),
       });
       const result = await response.json();
@@ -48,15 +65,8 @@ export default function AuthPage() {
       toast.success(mode === "signup" ? "Account creato" : "Bentornato!");
       setSuccessState({ name: result.user.name, action: mode === "signup" ? "signed up" : "logged in" });
       const next = new URLSearchParams(window.location.search).get("next");
-      const allowedDestinations = ["/", "/order", "/tracking", "/menu"];
-      if (reservationsEnabled()) allowedDestinations.push("/reservations");
-      if (
-        next &&
-        (allowedDestinations.includes(next) ||
-          /^\/orders\/EA-[A-Fa-f0-9]{16}$/.test(next))
-      ) {
-        router.replace(next);
-      }
+      const destination = safeAuthDestination(next);
+      if (destination) router.replace(destination);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Accesso non riuscito.");
     } finally {
@@ -84,8 +94,8 @@ export default function AuthPage() {
     const password = signupForm.password;
     const confirmPassword = signupForm.confirmPassword;
 
-    if (!name || !email || !password) {
-      toast.error("Nome, email e password sono obbligatori");
+    if (!name || !email || !password || !normalizeItalianPhone(signupForm.phone)) {
+      toast.error("Nome, email, telefono italiano e password sono obbligatori.");
       return;
     }
 
@@ -100,6 +110,43 @@ export default function AuthPage() {
     }
 
     void authenticate("signup");
+  };
+
+  const completeProfile = async (event: FormEvent) => {
+    event.preventDefault();
+    const phone = normalizeItalianPhone(profilePhone);
+    if (!phone) {
+      toast.error("Inserisci un numero italiano valido con prefisso +39.");
+      return;
+    }
+    setSavingPhone(true);
+    try {
+      const response = await fetch("/api/auth", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Impossibile salvare il telefono.");
+      signIn(result.user);
+      toast.success("Numero di telefono salvato.");
+      const destination = safeAuthDestination(
+        new URLSearchParams(window.location.search).get("next"),
+      );
+      router.replace(destination ?? "/");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Impossibile salvare il telefono.");
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
+  const startGoogleLogin = () => {
+    const next = new URLSearchParams(window.location.search).get("next");
+    const destination = safeAuthDestination(next);
+    const url = new URL("/api/auth/google", window.location.origin);
+    if (destination) url.searchParams.set("next", destination);
+    window.location.assign(url);
   };
 
   if (hasHydrated && isAuthenticated && user) {
@@ -124,6 +171,75 @@ export default function AuthPage() {
             textAlign: "center",
           }}
         >
+          {!normalizeItalianPhone(user.phone ?? "") ? (
+            <>
+              <p className="section-label" style={{ marginBottom: "10px" }}>
+                Ultimo passaggio
+              </p>
+              <h1
+                className="font-display"
+                style={{
+                  fontSize: "30px",
+                  fontWeight: 800,
+                  color: "#F5EDD8",
+                  marginBottom: "12px",
+                }}
+              >
+                Completa il tuo profilo
+              </h1>
+              <p style={{ color: "#8A7566", marginBottom: "24px" }}>
+                Per usare il tuo account è necessario un numero di telefono italiano.
+              </p>
+              <form
+                onSubmit={completeProfile}
+                style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <label
+                  htmlFor="profile-phone"
+                  style={{ textAlign: "left", color: "#8A7566", fontSize: "13px" }}
+                >
+                  Numero di telefono *
+                </label>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      padding: "14px",
+                      background: "#1A1612",
+                      border: "1px solid #3D3028",
+                      borderRadius: "10px",
+                      color: "#F5EDD8",
+                    }}
+                  >
+                    +39
+                  </span>
+                  <input
+                    id="profile-phone"
+                    className="input-field"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    placeholder="320 123 4567"
+                    required
+                    value={italianPhoneDigits(profilePhone)}
+                    onChange={(event) =>
+                      setProfilePhone(italianPhoneDigits(event.target.value))
+                    }
+                    style={{ flex: 1 }}
+                  />
+                </div>
+                <button
+                  className="btn-ember"
+                  type="submit"
+                  disabled={savingPhone}
+                  style={{ padding: "14px 18px", borderRadius: "10px", fontWeight: 700 }}
+                >
+                  {savingPhone ? "Salvataggio..." : "Salva e continua"}
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
           <div
             style={{
               width: "84px",
@@ -181,6 +297,8 @@ export default function AuthPage() {
           >
             Torna alla home
           </button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -392,6 +510,7 @@ export default function AuthPage() {
             </div>
             <div>
               <label
+                htmlFor="signup-phone"
                 style={{
                   fontSize: "12px",
                   color: "#8A7566",
@@ -403,15 +522,37 @@ export default function AuthPage() {
               >
                 Telefono
               </label>
-              <input
-                className="input-field"
-                type="tel"
-                placeholder="+39..."
-                value={signupForm.phone}
-                onChange={(event) =>
-                  setSignupForm({ ...signupForm, phone: event.target.value })
-                }
-              />
+              <div style={{ display: "flex", gap: "8px" }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    padding: "14px",
+                    background: "#1A1612",
+                    border: "1px solid #3D3028",
+                    borderRadius: "10px",
+                    color: "#F5EDD8",
+                  }}
+                >
+                  +39
+                </span>
+                <input
+                  id="signup-phone"
+                  className="input-field"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  placeholder="320 123 4567"
+                  required
+                  value={italianPhoneDigits(signupForm.phone)}
+                  onChange={(event) =>
+                    setSignupForm({
+                      ...signupForm,
+                      phone: italianPhoneDigits(event.target.value),
+                    })
+                  }
+                  style={{ flex: 1 }}
+                />
+              </div>
             </div>
             <div
               className="password-grid"
@@ -506,6 +647,21 @@ export default function AuthPage() {
             </p>
           </form>
         )}
+
+        <button
+          type="button"
+          onClick={startGoogleLogin}
+          className="btn-ghost"
+          style={{
+            width: "100%",
+            marginTop: "16px",
+            padding: "14px 18px",
+            borderRadius: "10px",
+            fontWeight: 700,
+          }}
+        >
+          Continua con Google
+        </button>
 
         <p className="auth-guest-copy" style={{ marginTop: "24px", fontSize: "13px", color: "#8A7566", textAlign: "center", borderTop: "1px solid #3D3028", paddingTop: "16px" }}>
           Vuoi continuare come ospite? Torna al{" "}

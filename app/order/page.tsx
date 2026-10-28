@@ -27,6 +27,7 @@ import {
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useFeatureStore } from "@/store/featureStore";
+import { italianPhoneDigits, normalizeItalianPhone } from "@/lib/phone";
 
 type Step = "cart" | "details" | "payment" | "confirm";
 type OrderType = "delivery" | "pickup" | "dine-in";
@@ -50,7 +51,7 @@ export default function OrderPage() {
   const [orderId, setOrderId] = useState("");
   const [publicCode, setPublicCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [whatsappConsent, setWhatsappConsent] = useState(false);
+  const [whatsappConsent, setWhatsappConsent] = useState<boolean | null>(null);
   const [notificationMessage, setNotificationMessage] = useState("");
   const requestRef = useRef<{ body: string; key: string } | null>(null);
   const [now, setNow] = useState(() => new Date());
@@ -70,10 +71,10 @@ export default function OrderPage() {
   }, []);
 
   useEffect(() => {
-    if (hasHydrated && !isAuthenticated) {
+    if (hasHydrated && (!isAuthenticated || !user?.phone || !normalizeItalianPhone(user.phone))) {
       router.replace("/auth?next=/order");
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [hasHydrated, isAuthenticated, router, user?.phone]);
 
   const sub = subtotal();
   const deliveryFee = orderType === "delivery" ? calculateDeliveryFee(sub) : 0;
@@ -105,8 +106,9 @@ export default function OrderPage() {
 
   const handlePlaceOrder = async () => {
     if (loading) return;
-    if (whatsappEnabled && whatsappConsent && !/^\+[1-9]\d{7,14}$/.test(customer.phone.replace(/[\s()-]/g, ""))) {
-      toast.error("Per WhatsApp inserisci il telefono con prefisso internazionale, ad esempio +39.");
+    const phone = normalizeItalianPhone(customer.phone);
+    if (!phone) {
+      toast.error("Inserisci un numero di telefono italiano valido con prefisso +39.");
       return;
     }
     if (isRestaurantClosed) {
@@ -141,10 +143,10 @@ export default function OrderPage() {
     try {
       const body = JSON.stringify({
         items: items.map(({ id, quantity, notes }) => ({ id, quantity, notes })),
-        customer,
+        customer: { ...customer, phone },
         type: orderType,
         paymentMethod,
-        whatsappConsent: whatsappEnabled && whatsappConsent,
+        whatsappConsent: whatsappEnabled && whatsappConsent !== false,
       });
       if (requestRef.current?.body !== body) {
         requestRef.current = { body, key: crypto.randomUUID() };
@@ -221,7 +223,7 @@ export default function OrderPage() {
     window.open(getWhatsAppUrl(msg), "_blank");
   };
 
-  if (!hasHydrated || !isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated || !user?.phone || !normalizeItalianPhone(user.phone)) {
     return (
       <div style={{ padding: "100px 24px" }}>
         <p>Verifica dell’accesso in corso...</p>
@@ -839,17 +841,38 @@ export default function OrderPage() {
                           textTransform: "uppercase",
                         }}
                       >
-                        Phone *
+                        Telefono *
                       </label>
-                      <input
-                        className="input-field"
-                        placeholder="+39..."
-                        type="tel"
-                        value={customer.phone}
-                        onChange={(e) =>
-                          setCustomer({ ...customer, phone: e.target.value })
-                        }
-                      />
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            padding: "14px",
+                            background: "#1A1612",
+                            border: "1px solid #3D3028",
+                            borderRadius: "10px",
+                            color: "#F5EDD8",
+                          }}
+                        >
+                          +39
+                        </span>
+                        <input
+                          className="input-field"
+                          placeholder="320 123 4567"
+                          type="tel"
+                          inputMode="numeric"
+                          autoComplete="tel-national"
+                          required
+                          value={italianPhoneDigits(customer.phone)}
+                          onChange={(e) =>
+                            setCustomer({
+                              ...customer,
+                              phone: `+39${italianPhoneDigits(e.target.value)}`,
+                            })
+                          }
+                          style={{ flex: 1 }}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -1343,14 +1366,14 @@ export default function OrderPage() {
                 {whatsappEnabled && <label style={{ display: "flex", gap: "12px", alignItems: "flex-start", margin: "20px 0", fontSize: "14px" }}>
                   <input
                     type="checkbox"
-                    checked={whatsappConsent}
+                    checked={whatsappEnabled && whatsappConsent !== false}
                     onChange={(event) => setWhatsappConsent(event.target.checked)}
                     disabled={loading}
                   />
                   <span>
                     Desidero ricevere su WhatsApp il riepilogo di questo ordine al
-                    numero indicato. Inserisci il prefisso internazionale (es. +39).
-                    Il consenso e&apos; facoltativo.
+                    numero indicato. La spunta è attiva in partenza, ma il consenso
+                    è facoltativo e puoi disattivarla prima di confermare.
                   </span>
                 </label>}
 

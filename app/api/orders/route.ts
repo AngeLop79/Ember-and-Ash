@@ -9,6 +9,7 @@ import { isSameOrigin } from "@/lib/requestOrigin";
 import { sendOrderNotification } from "@/lib/whatsapp";
 import { notificationMessage } from "@/lib/orderNotifications";
 import { whatsappOrderNotificationsEnabled } from "@/lib/features";
+import { normalizeItalianPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 
@@ -69,25 +70,24 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
     typeof customer.email === "string" ? customer.email.trim() : "";
   const address =
     typeof customer.address === "string" ? customer.address.trim() : "";
-  const normalizedPhone = phone.replace(/[\s()-]/g, "");
+  const normalizedPhone = normalizeItalianPhone(phone);
 
   if (
     customerName.length < 2 ||
     customerName.length > 120 ||
-    phone.length < 5 ||
+    !normalizedPhone ||
     phone.length > 40 ||
     email.length > 254 ||
     address.length > 500 ||
     (type === "delivery" && address.length === 0) ||
-    (email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) ||
-    (value.whatsappConsent === true && !/^\+[1-9]\d{7,14}$/.test(normalizedPhone))
+    (email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
   ) {
     return null;
   }
 
   return {
     items: normalizedItems,
-    customer: { name: customerName, phone: value.whatsappConsent ? normalizedPhone : phone, email, address },
+    customer: { name: customerName, phone: normalizedPhone, email, address },
     type: type as OrderRequest["type"],
     paymentMethod: paymentMethod as OrderRequest["paymentMethod"],
     whatsappConsent: value.whatsappConsent === true,
@@ -107,6 +107,9 @@ export async function POST(request: Request) {
   }
   if (!user) {
     return Response.json({ error: "Accedi prima di completare l'ordine." }, { status: 401 });
+  }
+  if (!normalizeItalianPhone(user.phone)) {
+    return Response.json({ error: "Completa il profilo inserendo il tuo telefono prima di ordinare." }, { status: 403 });
   }
   const requestKey = request.headers.get("Idempotency-Key");
   if (!requestKey || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(requestKey)) {

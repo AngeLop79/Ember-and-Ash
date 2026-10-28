@@ -10,6 +10,7 @@ import {
 } from "@/lib/customerAuth";
 import { getDb } from "@/lib/db";
 import { isSameOrigin } from "@/lib/requestOrigin";
+import { normalizeItalianPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "no-store" };
@@ -59,9 +60,10 @@ export async function POST(request: Request) {
     let user: CustomerUser;
     if (body.mode === "signup") {
       const name = "name" in body && typeof body.name === "string" ? body.name.trim() : "";
-      const phone = "phone" in body && typeof body.phone === "string" ? body.phone.trim() : "";
-      if (name.length < 2 || name.length > 120 || phone.length > 40) {
-        return Response.json({ error: "Nome o telefono non validi." }, { status: 400, headers });
+      const rawPhone = "phone" in body && typeof body.phone === "string" ? body.phone : "";
+      const phone = normalizeItalianPhone(rawPhone);
+      if (name.length < 2 || name.length > 120 || !phone) {
+        return Response.json({ error: "Nome o numero di telefono italiano non validi. Inserisci il prefisso +39 e da 6 a 11 cifre." }, { status: 400, headers });
       }
       const result = await getDb().query<CustomerUser>(
         `INSERT INTO customers (id, name, email, phone, password_hash)
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
       }
       user = result.rows[0];
     } else {
-      const result = await getDb().query<CustomerUser & { password_hash: string }>(
+      const result = await getDb().query<CustomerUser & { password_hash: string | null }>(
         "SELECT id, name, email, phone, password_hash FROM customers WHERE email = $1", [email],
       );
       const account = result.rows[0];
@@ -82,7 +84,7 @@ export async function POST(request: Request) {
       const hash = account?.password_hash ??
         `scrypt:${"0".repeat(32)}:${"0".repeat(128)}`;
       const valid = await verifyPassword(password, hash);
-      if (!account || !valid) {
+      if (!account || !account.password_hash || !valid) {
         return Response.json({ error: "Email o password non corrette." }, { status: 401, headers });
       }
       user = { id: account.id, name: account.name, email: account.email, phone: account.phone };
@@ -92,6 +94,45 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Customer authentication failed.", error);
     return Response.json({ error: "Accesso temporaneamente non disponibile. Riprova." }, { status: 503, headers });
+  }
+}
+
+export async function PATCH(request: Request) {
+  if (!isSameOrigin(request)) {
+    return Response.json({ error: "Origine non valida." }, { status: 403, headers });
+  }
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Richiesta JSON non valida." }, { status: 400, headers });
+  }
+  if (
+    typeof body !== "object" || body === null ||
+    !("phone" in body) || typeof body.phone !== "string"
+  ) {
+    return Response.json({ error: "Inserisci un numero di telefono italiano." }, { status: 400, headers });
+  }
+  const phone = normalizeItalianPhone(body.phone);
+  if (!phone) {
+    return Response.json({ error: "Inserisci il prefisso +39 e da 6 a 11 cifre." }, { status: 400, headers });
+  }
+  try {
+    const user = await getCustomer();
+    if (!user) {
+      return Response.json({ error: "Accedi per completare il profilo." }, { status: 401, headers });
+    }
+    const result = await getDb().query<CustomerUser>(
+      "UPDATE customers SET phone = $1 WHERE id = $2 RETURNING id, name, email, phone",
+      [phone, user.id],
+    );
+    if (!result.rows[0]) {
+      return Response.json({ error: "Account cliente non trovato." }, { status: 404, headers });
+    }
+    return Response.json({ user: result.rows[0] }, { headers });
+  } catch (error) {
+    console.error("Failed to complete customer profile.", error);
+    return Response.json({ error: "Impossibile salvare il numero di telefono." }, { status: 503, headers });
   }
 }
 
