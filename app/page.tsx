@@ -140,7 +140,7 @@ export default function HomePage() {
                   gap: "10px",
                 }}
               >
-                Scopri il menu <ArrowRight size={18} />
+                IL NOSTRO MENU <ArrowRight size={18} />
               </button>
             </Link>
             {reservationsEnabled() && (
@@ -173,7 +173,7 @@ export default function HomePage() {
             {[
               { label: "Piatti in menu", value: "10+" },
               { label: "Ospiti soddisfatti", value: "12k+" },
-              { label: "Anni di maialate", value: "13+" },
+              { label: "Edizioni di festa", value: "13+" },
               { label: "Valutazione", value: "4.9★" },
             ].map((stat) => (
               <div key={stat.label}>
