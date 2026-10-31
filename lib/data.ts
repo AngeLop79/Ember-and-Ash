@@ -75,7 +75,7 @@ export const MENU_ITEMS: MenuItem[] = [
     "Costine di maiale cotte al forno, tenere e saporite, accompagnate da verdure ",
   price: 1000,
   category: "grills",
-    image: "/images/menu/costine.jpg",
+    image: "/images/menu/Costine.jpg",
   tags: ["premium"],
   available: true,
   featured: false,
