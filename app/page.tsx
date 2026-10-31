@@ -9,6 +9,7 @@ import {
   MapPin,
   Clock,
   X,
+  Zap,
 } from "lucide-react";
 import { MENU_ITEMS, RESTAURANT_INFO } from "@/lib/data";
 import { reservationsEnabled } from "@/lib/features";
@@ -119,12 +120,33 @@ export default function HomePage() {
             width: "100%",
           }}
         >
-          <p className="section-label " style={{marginTop: "13px", marginBottom: "24px" }}>
-            🔥 Le ordinazioni sono aperte!
-          </p>
           <h1 className="font-display home-event-title" style={{ color: "#F5EDD8" }}>
             XIII Sagra del Maiale
           </h1>
+          <p style={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "8px",
+            marginTop: "16px",
+            color: "#F5EDD8",
+            fontSize: "clamp(14px, 2vw, 16px)",
+            fontWeight: 600,
+            lineHeight: 1.5,
+          }}>
+            <strong style={{
+              padding: "4px 10px",
+              borderRadius: "999px",
+              background: "#E8541A",
+              color: "#FFFFFF",
+              fontSize: "0.85em",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}>
+              Ordina e salta la fila!
+            </strong>
+          </p>
           <p style={{
             maxWidth: "560px",
             padding: "14px 18px",

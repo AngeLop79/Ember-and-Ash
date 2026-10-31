@@ -20,8 +20,7 @@ export const RESTAURANT_INFO = {
 export const CATEGORIES = [
   { id: "all", label: "Tutti" },
   { id: "mains", label: "Piatti principali" },
-  { id: "grills", label: "Griglia" },
-  { id: "sides", label: "Contorni" },
+  { id: "grills", label: "Panini" },
   { id: "drinks", label: "Bevande" },
   { id: "desserts", label: "Dolci" },
 ];
@@ -48,12 +47,26 @@ export const MENU_ITEMS: MenuItem[] = [
       "Panino caldo e fragrante farcito con soffritto di salsiccia sbriciolata e saporita, accompagnato da salse a scelta",
     price: 500,
     category: "mains",
-    image: "/images/menu/panino.jpg",
+    image: "/images/menu/paninoSbriciolata.jpg",
     tags: ["grilled", "popular", "bestseller"],
     available: true,
     featured: true,
     spiceLevel: 1,
     prepTime: 20,
+  },
+  {
+    id: "3",
+    name: "Panino con Cotoletta di Maiale",
+    description:
+      "Panino caldo e fragrante farcito con una croccante cotoletta di maiale impanata e fritta, dorata e saporita",
+    price: 500,
+    category: "mains",
+    image: "/images/menu/PaninoCotoletta.jpg",
+    tags: ["popular", "bestseller"],
+    available: true,
+    featured: true,
+    spiceLevel: 0,
+    prepTime: 15,
   },
   {
   id: "9",

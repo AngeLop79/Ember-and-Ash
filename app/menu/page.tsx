@@ -31,7 +31,7 @@ export default function MenuPage() {
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <p className="section-label" style={{ marginBottom: "12px" }}>
-            Piatti preparati alla brace
+            I sapori di una volta, preparati con amore
           </p>
           <h1
             className="font-display menu-title"
