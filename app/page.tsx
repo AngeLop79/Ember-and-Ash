@@ -173,7 +173,7 @@ export default function HomePage() {
               fontWeight: 700,
               lineHeight: 1.12,
               color: "#E8541A",
-              marginTop: "18px",
+              marginTop: "6px",
               marginBottom: "24px",
             }}
           >
@@ -189,7 +189,7 @@ export default function HomePage() {
               marginBottom: "40px",
             }}
           >
-            La tradizione calabrese, il gusto della cucina contadina e il profumo del maiale alla brace: una festa di sapori autentici e convivialità, nel cuore della nostra comunità.
+            La tradizione calabrese, il gusto della cucina contadina: una festa di sapori autentici e convivialità, nel cuore della nostra comunità.
           </p>
           <div
             className="mobile-stack mobile-small-gap"
