@@ -15,6 +15,8 @@ export interface MenuItem {
 export interface CartItem extends MenuItem {
   quantity: number;
   notes?: string;
+  cartId?: string;
+  accessories?: { id: string; name: string; description: string }[];
 }
 
 export interface Order {

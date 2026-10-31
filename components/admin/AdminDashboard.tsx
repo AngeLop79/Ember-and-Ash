@@ -22,8 +22,9 @@ import toast from "react-hot-toast";
 import { notificationMessage, type NotificationStatus } from "@/lib/orderNotifications";
 import { useFeatureStore } from "@/store/featureStore";
 import { reservationsEnabled } from "@/lib/features";
+import AccessorySettings from "@/components/admin/AccessorySettings";
 
-type AdminTab = "overview" | "orders" | "reservations" | "menu";
+type AdminTab = "overview" | "orders" | "reservations" | "menu" | "accessories";
 
 type OrderStatus =
   | "pending"
@@ -104,12 +105,12 @@ const STATUS_CONFIG: Record<
   },
   ready: { label: "Pronto", color: "#A78BFA", bg: "rgba(167,139,250,0.12)" },
   "out-for-delivery": {
-    label: "In consegna",
+    label: "Pronto",
     color: "#34D399",
     bg: "rgba(52,211,153,0.12)",
   },
   delivered: {
-    label: "Consegnato",
+    label: "Ritirato",
     color: "#6EE7B7",
     bg: "rgba(110,231,183,0.12)",
   },
@@ -121,7 +122,7 @@ const STATUS_CONFIG: Record<
 };
 
 const ORDER_TYPE_LABELS: Record<string, string> = {
-  delivery: "Consegna a domicilio",
+  delivery: "Ordine precedente",
   pickup: "Ritiro",
   "dine-in": "Consumo al ristorante",
 };
@@ -259,6 +260,7 @@ export default function AdminDashboard() {
         }]
       : []),
     { id: "menu", label: "Piatti del menu", icon: <ChefHat size={16} /> },
+    { id: "accessories", label: "Accessori e personalizzazioni", icon: <ChefHat size={16} /> },
   ] as const;
 
   return (
@@ -309,7 +311,7 @@ export default function AdminDashboard() {
                 className="font-display"
                 style={{ fontSize: "22px", fontWeight: 700, color: "#F5EDD8" }}
               >
-                Console amministrativa
+                Console dei Ragazzi del Sole
               </h1>
               <p style={{ fontSize: "12px", color: "#8A7566" }}>
                 I Ragazzi del Sole
@@ -493,7 +495,7 @@ export default function AdminDashboard() {
                   value: formatPrice(totalRevenue),
                   icon: <TrendingUp size={20} />,
                   color: "#D4A843",
-                  sub: "Dagli ordini consegnati",
+                  sub: "Dagli ordini completati",
                 },
                 {
                   label: "Ordini attivi",
@@ -717,11 +719,11 @@ export default function AdminDashboard() {
                   }}
                 >
                   {[
-                    { name: "Riso jollof alla brace", count: 24, pct: 90 },
-                    { name: "Spiedini di suya", count: 19, pct: 72 },
-                    { name: "Bistecca T-bone", count: 14, pct: 52 },
-                    { name: "Lumache piccanti", count: 11, pct: 42 },
-                    { name: "Chapman", count: 31, pct: 100 },
+                    { name: "Panino con sbriciolata", count: 24, pct: 90 },
+                    { name: "STinco di maiale", count: 19, pct: 72 },
+                    { name: "Costine di Maiale", count: 14, pct: 52 },
+                    { name: "Panino con la cotoletta", count: 11, pct: 42 },
+                    { name: "Panino con i frisuli", count: 12, pct: 90 },
                   ].map((item) => (
                     <div key={item.name}>
                       <div
@@ -787,7 +789,7 @@ export default function AdminDashboard() {
                   ["all", "Tutti"],
                   ["pending", "In attesa"],
                   ["preparing", "In preparazione"],
-                  ["delivered", "Consegnati"],
+                  ["delivered", "Ritirati"],
                 ].map(([f, label]) => (
                   <button
                     key={f}
@@ -974,25 +976,6 @@ export default function AdminDashboard() {
                               }}
                             >
                               Segna come pronto
-                            </button>
-                          )}
-                          {order.status === "ready" && order.type === "Delivery" && (
-                            <button
-                              onClick={() =>
-                                updateOrderStatus(order.id, "out-for-delivery")
-                              }
-                              style={{
-                                padding: "6px 14px",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: 600,
-                                background: "#34D399",
-                                color: "#1A1612",
-                                border: "none",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Affidato al corriere
                             </button>
                           )}
                           {!["delivered", "cancelled"].includes(
@@ -1265,6 +1248,8 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {tab === "accessories" && <AccessorySettings />}
 
         {/* MENU TAB */}
         {tab === "menu" && (

@@ -2,15 +2,14 @@
 
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
-import { formatPrice, buildWhatsAppOrderMessage, getWhatsAppUrl, calculateDeliveryFee } from "@/lib/utils";
+import { formatPrice, buildWhatsAppOrderMessage, getWhatsAppUrl } from "@/lib/utils";
 import { useEffect } from "react";
 import Link from "next/link";
 
 export default function Cart() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, itemCount } = useCartStore();
   const sub = subtotal();
-  const deliveryFee = calculateDeliveryFee(sub);
-  const total = sub + deliveryFee;
+  const total = sub;
   const count = itemCount();
 
   useEffect(() => {
@@ -20,7 +19,7 @@ export default function Cart() {
   }, [isOpen]);
 
   const handleWhatsAppOrder = () => {
-    const msg = buildWhatsAppOrderMessage(items, total, "delivery");
+    const msg = buildWhatsAppOrderMessage(items, total, "pickup");
     window.open(getWhatsAppUrl(msg), "_blank");
   };
 
@@ -87,7 +86,7 @@ export default function Cart() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {items.map((item) => (
-                <div key={item.id} style={{
+                <div key={item.cartId ?? item.id} style={{
                   background: "#221C16", border: "1px solid #3D3028", borderRadius: "10px", padding: "14px",
                   display: "flex", gap: "12px",
                 }}>
@@ -103,10 +102,15 @@ export default function Cart() {
                     <p style={{ fontSize: "13px", color: "#E8541A", fontWeight: 600 }}>
                       {formatPrice(item.price)}
                     </p>
+                    {!!item.accessories?.length && (
+                      <p style={{ fontSize: "13px", color: "#FFFFFF", fontWeight: 600, lineHeight: 1.5, marginTop: "6px", overflowWrap: "anywhere" }}>
+                        {item.accessories.map(({ name }) => name).join(" · ")}
+                      </p>
+                    )}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "8px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.cartId ?? item.id, item.quantity - 1)}
                           style={{
                             width: "26px", height: "26px", borderRadius: "6px", background: "#3D3028",
                             border: "none", color: "#F5EDD8", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
@@ -118,7 +122,7 @@ export default function Cart() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.cartId ?? item.id, item.quantity + 1)}
                           style={{
                             width: "26px", height: "26px", borderRadius: "6px", background: "#E8541A",
                             border: "none", color: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
@@ -132,7 +136,7 @@ export default function Cart() {
                           {formatPrice(item.price * item.quantity)}
                         </span>
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.cartId ?? item.id)}
                           style={{ background: "transparent", border: "none", color: "#8A7566", cursor: "pointer" }}
                         >
                           <Trash2 size={14} />
@@ -154,12 +158,6 @@ export default function Cart() {
                 <span style={{ fontSize: "13px", color: "#8A7566" }}>Subtotale</span>
                 <span style={{ fontSize: "13px", color: "#F5EDD8" }}>{formatPrice(sub)}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                <span style={{ fontSize: "13px", color: "#8A7566" }}>Consegna</span>
-                <span style={{ fontSize: "13px", color: deliveryFee === 0 ? "#D4A843" : "#F5EDD8" }}>
-                  {deliveryFee === 0 ? "Gratuita" : formatPrice(deliveryFee)}
-                </span>
-              </div>
               <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "12px", borderTop: "1px solid #3D3028" }}>
                 <span style={{ fontWeight: 700, fontSize: "16px", color: "#F5EDD8" }}>Totale</span>
                 <span style={{ fontWeight: 700, fontSize: "18px", color: "#E8541A" }}>{formatPrice(total)}</span>
@@ -171,7 +169,7 @@ export default function Cart() {
                 width: "100%", padding: "14px", borderRadius: "10px",
                 fontSize: "15px", fontWeight: 600, marginBottom: "10px",
               }}>
-                Vai all'ordine — {formatPrice(total)}
+                Vai all&apos;ordine — {formatPrice(total)}
               </button>
             </Link>
 

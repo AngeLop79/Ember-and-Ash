@@ -7,10 +7,11 @@ interface CartStore {
   items: CartItem[];
   isOpen: boolean;
   hasHydrated: boolean;
-  addItem: (item: MenuItem) => void;
+  addItem: (item: MenuItem, accessories?: CartItem["accessories"]) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   updateNotes: (id: string, notes: string) => void;
+  clearAccessories: () => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
@@ -47,21 +48,23 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
       hasHydrated: false,
 
-      addItem: (item) => {
-        const existing = get().items.find((i) => i.id === item.id);
+      addItem: (item, accessories = []) => {
+        const sortedAccessories = [...accessories].sort((a, b) => a.id.localeCompare(b.id));
+        const cartId = `${item.id}:${sortedAccessories.map(({ id }) => id).join(",")}`;
+        const existing = get().items.find((i) => (i.cartId ?? `${i.id}:`) === cartId);
         if (existing) {
           set({
             items: get().items.map((i) =>
-              i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i,
+              (i.cartId ?? `${i.id}:`) === cartId ? { ...i, quantity: i.quantity + 1 } : i,
             ),
           });
         } else {
-          set({ items: [...get().items, { ...item, quantity: 1 }] });
+          set({ items: [...get().items, { ...item, cartId, accessories: sortedAccessories, quantity: 1 }] });
         }
       },
 
       removeItem: (id) => {
-        set({ items: get().items.filter((i) => i.id !== id) });
+        set({ items: get().items.filter((i) => (i.cartId ?? i.id) !== id) });
       },
 
       updateQuantity: (id, quantity) => {
@@ -70,14 +73,24 @@ export const useCartStore = create<CartStore>()(
           return;
         }
         set({
-          items: get().items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+          items: get().items.map((i) => ((i.cartId ?? i.id) === id ? { ...i, quantity } : i)),
         });
       },
 
       updateNotes: (id, notes) => {
         set({
-          items: get().items.map((i) => (i.id === id ? { ...i, notes } : i)),
+          items: get().items.map((i) => ((i.cartId ?? i.id) === id ? { ...i, notes } : i)),
         });
+      },
+
+      clearAccessories: () => {
+        const merged = new Map<string, CartItem>();
+        for (const item of get().items) {
+          const current = merged.get(item.id);
+          if (current) current.quantity += item.quantity;
+          else merged.set(item.id, { ...item, cartId: `${item.id}:`, accessories: [] });
+        }
+        set({ items: [...merged.values()] });
       },
 
       clearCart: () => set({ items: [] }),

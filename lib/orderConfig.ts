@@ -2,7 +2,7 @@ export type OrderType = "delivery" | "pickup" | "dine-in";
 export type PaymentMethod = "card" | "cash" | "transfer";
 
 const orderTypeOptions = [
-  ["delivery", process.env.NEXT_PUBLIC_ORDER_DELIVERY_ENABLED === "true"],
+  ["delivery", false],
   ["pickup", process.env.NEXT_PUBLIC_ORDER_PICKUP_ENABLED !== "false"],
   ["dine-in", process.env.NEXT_PUBLIC_ORDER_DINE_IN_ENABLED === "true"],
 ] as const;

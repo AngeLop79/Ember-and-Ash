@@ -1,7 +1,7 @@
 import type { OrderStatus } from "@/types";
 
 export const ORDER_TYPES = {
-  delivery: "Consegna a domicilio",
+  delivery: "Ordine precedente",
   pickup: "Ritiro in sede",
   "dine-in": "Consumo al ristorante",
 };
@@ -13,19 +13,20 @@ export const PAYMENT_METHODS = {
 };
 
 export function isOrderCollectable(status: OrderStatus, type: string): boolean {
-  if (type === "delivery") return status === "out-for-delivery";
-  // Older pickup orders could also enter the courier step.
+  void type;
+  // Accept the legacy courier state so existing orders can still be closed.
   return status === "ready" || status === "out-for-delivery";
 }
 
 export function orderStatusLabel(status: OrderStatus, type: string): string {
-  if (status === "delivered" && type !== "delivery") return "Ritirato";
+  void type;
+  if (status === "delivered") return "Ritirato";
   return {
     pending: "In attesa di conferma",
     confirmed: "Confermato",
     preparing: "In preparazione",
     ready: "Pronto",
-    "out-for-delivery": "In consegna",
+    "out-for-delivery": "Pronto",
     delivered: "Consegnato",
     cancelled: "Annullato",
   }[status];

@@ -24,7 +24,10 @@ function setup(fetchImpl, env = configured) {
   const order = {
     id: "EA-0123456789ABCDEF", publicCode: "A-042", customer: "Test",
     total: 1000, type: "pickup", address: null, status: "ready", paymentStatus: "paid",
-    items: [{ name: "Piatto", quantity: 2, unitPrice: 500, notes: "Poco sale" }],
+    items: [{
+      name: "Piatto", quantity: 2, unitPrice: 500, notes: "Poco sale",
+      accessories: [{ id: "maionese", name: "Maionese", description: "" }],
+    }],
   };
   let calls = 0;
   const logs = [];
@@ -228,6 +231,7 @@ for (const format of ["named", "positional"]) {
       assert.equal(components[0].parameters[1].text, "A-042");
       assert.match(components[0].parameters[6].text, /Pronto; pagato/);
       assert.match(components[0].parameters[2].text, /2 x Piatto.*Poco sale/);
+      assert.match(components[0].parameters[2].text, /Maionese/);
       assert.equal(components[0].parameters[1].parameter_name, format === "named" ? "order_code" : undefined);
       assert.deepEqual(components[1], {
         type: "button", sub_type: "url", index: "0",

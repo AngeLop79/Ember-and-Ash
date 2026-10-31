@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -7,12 +8,13 @@ import {
   Calendar,
   MapPin,
   Clock,
-  Star,
+  X,
 } from "lucide-react";
 import { MENU_ITEMS, RESTAURANT_INFO } from "@/lib/data";
 import { reservationsEnabled } from "@/lib/features";
 import { useCartStore } from "@/store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import { useAccessoryStore } from "@/store/accessoryStore";
 import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 
@@ -22,9 +24,36 @@ export default function HomePage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { addItem, openCart } = useCartStore();
-  const handleAdd = (item: (typeof MENU_ITEMS)[0]) => {
+  const accessoriesByProduct = useAccessoryStore((state) => state.byProduct);
+  const [customizingItem, setCustomizingItem] = useState<(typeof MENU_ITEMS)[number] | null>(null);
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
+  const handleAdd = async (item: (typeof MENU_ITEMS)[0]) => {
+    let accessoryState = useAccessoryStore.getState();
+    if (!accessoryState.loaded) {
+      try {
+        await accessoryState.load();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Impossibile caricare le personalizzazioni.");
+        return;
+      }
+      accessoryState = useAccessoryStore.getState();
+    }
+    if (accessoryState.enabled && (accessoryState.byProduct[item.id]?.length ?? 0) > 0) {
+      setCustomizingItem(item);
+      setSelectedAccessories([]);
+      return;
+    }
     addItem(item);
     toast.success(`${item.name} aggiunto al carrello!`);
+    openCart();
+  };
+  const confirmAdd = () => {
+    if (!customizingItem) return;
+    const choices = accessoriesByProduct[customizingItem.id] ?? [];
+    addItem(customizingItem, choices.filter(({ id }) => selectedAccessories.includes(id)));
+    toast.success(`${customizingItem.name} aggiunto al carrello!`);
+    setCustomizingItem(null);
+    setSelectedAccessories([]);
     openCart();
   };
 
@@ -35,7 +64,7 @@ export default function HomePage() {
       return;
     }
     const message = encodeURIComponent(
-      "Salve I ragazzi del sole! Vorrei effettuare un ordine 🔥",
+      "Salve I ragazzi del sole! Vorrei effettuare un ordine",
     );
     window.open(
       `https://wa.me/${RESTAURANT_INFO.whatsapp.replace(/\+/g, "")}?text=${message}`,
@@ -96,6 +125,22 @@ export default function HomePage() {
           <h1 className="font-display home-event-title" style={{ color: "#F5EDD8" }}>
             XIII Sagra del Maiale
           </h1>
+          <p style={{
+            maxWidth: "560px",
+            padding: "14px 18px",
+            marginTop: "18px",
+            marginBottom: "24px",
+            border: "1px solid #D4A843",
+            borderRadius: "12px",
+            background: "rgba(26,22,18,0.9)",
+            color: "#F5EDD8",
+            fontSize: "clamp(16px, 2.5vw, 20px)",
+            fontWeight: 600,
+            lineHeight: 1.5,
+          }}>
+            Le ordinazioni chiudono alle{" "}
+            <strong style={{ color: "#D4A843" }}>19:00 del 12 dicembre</strong>
+          </p>
           <p className="home-organizer" style={{ marginTop: "18px" }}>
             Associazione I Ragazzi del Sole
           </p>
@@ -140,7 +185,7 @@ export default function HomePage() {
                   gap: "10px",
                 }}
               >
-                IL NOSTRO MENU <ArrowRight size={18} />
+                IL  NOSTRO MENU <ArrowRight size={18} />
               </button>
             </Link>
             {reservationsEnabled() && (
@@ -353,7 +398,7 @@ export default function HomePage() {
             className="section-label"
             style={{ marginBottom: "12px", textAlign: "center" }}
           >
-            Semplice come il fuoco
+            Semplice come una volta
           </p>
           <h2
             className="font-display"
@@ -390,7 +435,7 @@ export default function HomePage() {
               {
                 step: "03",
                 title: "Segui l’ordine e gusta",
-                desc: "Segui l’avanzamento dell’ordine e assapora ogni boccone cotto alla brace.",
+                desc: "Segui l’avanzamento dell’ordine e assapora ogni boccone di pura tradizione.",
                 icon: "🔥",
               },
             ].map((s) => (
@@ -575,32 +620,6 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <div
-            style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}
-          >
-            <Star
-              size={22}
-              color="#D4A843"
-              style={{ flexShrink: 0, marginTop: "2px" }}
-            />
-            <div>
-              <p
-                style={{
-                  fontWeight: 600,
-                  color: "#F5EDD8",
-                  marginBottom: "4px",
-                }}
-              >
-                Consegna
-              </p>
-              <p style={{ fontSize: "13px", color: "#8A7566" }}>
-                Entro {RESTAURANT_INFO.deliveryRadius}
-              </p>
-              <p style={{ fontSize: "13px", color: "#D4A843" }}>
-                Gratuita sopra {formatPrice(RESTAURANT_INFO.freeDeliveryAbove)}
-              </p>
-            </div>
-          </div>
         </div>
       </section>
       <footer
@@ -621,6 +640,87 @@ export default function HomePage() {
           </a>
         </p>
       </footer>
+      {customizingItem && (
+        <div
+          onClick={() => setCustomizingItem(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1400,
+            background: "rgba(0,0,0,0.72)",
+            display: "grid",
+            placeItems: "center",
+            padding: "16px",
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="home-accessory-title"
+            onClick={(event) => event.stopPropagation()}
+            className="card"
+            style={{
+              width: "min(100%, 440px)",
+              maxHeight: "min(80dvh, 640px)",
+              overflowY: "auto",
+              padding: "22px",
+              border: "1px solid #6B4E32",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.55)",
+            }}
+          >
+            <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "18px" }}>
+              <div>
+                <p className="section-label">Personalizzazione gratuita</p>
+                <h2 id="home-accessory-title" className="font-display" style={{ fontSize: "24px", color: "#F5EDD8", marginTop: "5px" }}>
+                  Personalizza il tuo ordine
+                </h2>
+                <p style={{ color: "#8A7566", fontSize: "13px", marginTop: "4px" }}>{customizingItem.name}</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Chiudi personalizzazione"
+                onClick={() => setCustomizingItem(null)}
+                style={{ background: "transparent", border: "1px solid #3D3028", borderRadius: "8px", color: "#8A7566", padding: "8px", cursor: "pointer" }}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <div style={{ display: "grid", gap: "10px", marginBottom: "20px" }}>
+              {(accessoriesByProduct[customizingItem.id] ?? []).map((accessory) => (
+                <label key={accessory.id} style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  border: "1px solid #3D3028",
+                  borderRadius: "10px",
+                  padding: "12px",
+                  color: "#F5EDD8",
+                  cursor: "pointer",
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedAccessories.includes(accessory.id)}
+                    onChange={(event) => setSelectedAccessories((current) =>
+                      event.target.checked
+                        ? [...current, accessory.id]
+                        : current.filter((id) => id !== accessory.id),
+                    )}
+                    style={{ accentColor: "#E8541A", marginTop: "3px" }}
+                  />
+                  <span style={{ flex: 1 }}>
+                    <span style={{ display: "block", fontSize: "14px", fontWeight: 600 }}>{accessory.name}</span>
+                    {accessory.description && <span style={{ display: "block", color: "#8A7566", fontSize: "12px", marginTop: "3px" }}>{accessory.description}</span>}
+                  </span>
+                  <span style={{ color: "#34D399", fontSize: "11px", fontWeight: 700 }}>GRATIS</span>
+                </label>
+              ))}
+            </div>
+            <button type="button" className="btn-ember" onClick={confirmAdd} style={{ width: "100%", padding: "13px", borderRadius: "9px" }}>
+              Aggiungi al carrello
+            </button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

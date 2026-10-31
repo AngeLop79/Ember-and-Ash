@@ -15,9 +15,6 @@ export const RESTAURANT_INFO = {
     weekday: 22,
     weekend: 23,
   },
-  deliveryRadius: "10km",
-  deliveryFee: 33,
-  freeDeliveryAbove: 534,
 };
 
 export const CATEGORIES = [
@@ -63,7 +60,7 @@ export const MENU_ITEMS: MenuItem[] = [
   name: "Costine di maiale al forno",
   description:
     "Costine di maiale cotte al forno, tenere e saporite, accompagnate da verdure ",
-  price: 802,
+  price: 1000,
   category: "grills",
     image: "/images/menu/costine.jpg",
   tags: ["premium"],

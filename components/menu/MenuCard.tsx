@@ -4,6 +4,7 @@ import { Plus, Check, Clock, Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import { MenuItem } from "@/types";
 import { useCartStore } from "@/store/cartStore";
+import { useAccessoryStore, type Accessory } from "@/store/accessoryStore";
 import { formatPrice, getSpiceLevelLabel } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useState } from "react";
@@ -12,13 +13,41 @@ interface MenuCardProps {
   item: MenuItem;
 }
 
+const NO_ACCESSORIES: Accessory[] = [];
+
 export default function MenuCard({ item }: MenuCardProps) {
   const { addItem, items } = useCartStore();
+  const accessoriesEnabled = useAccessoryStore((state) => state.enabled);
+  const accessoryOptions = useAccessoryStore(
+    (state) => state.byProduct[item.id],
+  ) ?? NO_ACCESSORIES;
   const [added, setAdded] = useState(false);
-  const inCart = items.find((i) => i.id === item.id);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedAccessories, setSelectedAccessories] = useState<string[]>([]);
+  const inCart = items.filter((i) => i.id === item.id).reduce((sum, current) => sum + current.quantity, 0);
 
-  const handleAdd = () => {
-    addItem(item);
+  const handleAdd = async () => {
+    let accessoryState = useAccessoryStore.getState();
+    if (!accessoryState.loaded) {
+      try {
+        await accessoryState.load();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Impossibile caricare le personalizzazioni.");
+        return;
+      }
+      accessoryState = useAccessoryStore.getState();
+    }
+    const options = accessoryState.byProduct[item.id] ?? [];
+    if (accessoryState.enabled && options.length > 0 && !pickerOpen) {
+      setPickerOpen(true);
+      return;
+    }
+    addItem(
+      item,
+      options.filter(({ id }) => selectedAccessories.includes(id)),
+    );
+    setPickerOpen(false);
+    setSelectedAccessories([]);
     setAdded(true);
     toast.success(`${item.name} aggiunto all’ordine`);
     setTimeout(() => setAdded(false), 1500);
@@ -101,12 +130,58 @@ export default function MenuCard({ item }: MenuCardProps) {
                 {getSpiceLevelLabel(item.spiceLevel ?? 0)}
               </span>
             )}
-            {inCart && (
+            {inCart > 0 && (
               <span style={{ fontSize: "12px", color: "#D4A843", fontWeight: 600 }}>
-                ×{inCart.quantity} nel carrello
+                ×{inCart} nel carrello
               </span>
             )}
           </div>
+
+          {accessoriesEnabled && accessoryOptions.length > 0 && pickerOpen && (
+            <fieldset style={{
+              border: "1px solid #3D3028",
+              borderRadius: "10px",
+              padding: "10px 12px",
+              margin: "0 0 14px",
+              minWidth: 0,
+            }}>
+              <legend style={{ padding: "0 6px", color: "#F5EDD8", fontSize: "13px", fontWeight: 700 }}>
+                Personalizza il tuo ordine
+              </legend>
+              <div style={{ display: "grid", gap: "8px" }}>
+                {accessoryOptions.map((accessory) => (
+                  <label key={accessory.id} style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "9px",
+                    color: "#F5EDD8",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedAccessories.includes(accessory.id)}
+                      onChange={(event) => setSelectedAccessories((current) =>
+                        event.target.checked
+                          ? [...current, accessory.id]
+                          : current.filter((id) => id !== accessory.id),
+                      )}
+                      style={{ accentColor: "#E8541A", marginTop: "2px" }}
+                    />
+                    <span style={{ flex: 1 }}>
+                      {accessory.name}
+                      {accessory.description && (
+                        <span style={{ display: "block", color: "#8A7566", fontSize: "12px", marginTop: "2px" }}>
+                          {accessory.description}
+                        </span>
+                      )}
+                    </span>
+                    <span style={{ color: "#34D399", fontSize: "11px", fontWeight: 700 }}>GRATIS</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
         </div>
 
         {/* Price & Add */}
@@ -117,17 +192,20 @@ export default function MenuCard({ item }: MenuCardProps) {
           <button
             onClick={handleAdd}
             disabled={!item.available}
+            aria-label={pickerOpen ? `Aggiungi ${item.name} al carrello` : `Personalizza o aggiungi ${item.name}`}
             style={{
-              width: "36px", height: "36px", borderRadius: "8px",
+              width: pickerOpen ? "auto" : "36px", minHeight: "36px", borderRadius: "8px",
               background: added ? "#25D366" : "#E8541A",
               border: "none", cursor: item.available ? "pointer" : "not-allowed",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
+              padding: pickerOpen ? "0 12px" : "0",
+              fontSize: "12px", fontWeight: 700, whiteSpace: "nowrap",
               color: "white", transition: "background 0.2s, transform 0.1s",
               transform: added ? "scale(0.95)" : "scale(1)",
               opacity: item.available ? 1 : 0.4,
             }}
           >
-            {added ? <Check size={16} /> : <Plus size={16} />}
+            {added ? <Check size={16} /> : pickerOpen ? <><Check size={15} /> Aggiungi</> : <Plus size={16} />}
           </button>
         </div>
       </div>

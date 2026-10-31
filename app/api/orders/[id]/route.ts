@@ -28,7 +28,14 @@ export async function GET(
     result = await getDb().query(
       `SELECT o.id, o.order_type, o.status,
         COALESCE(
-          string_agg(oi.name || ' × ' || oi.quantity, ', ' ORDER BY oi.id),
+          string_agg(
+            oi.name || ' × ' || oi.quantity ||
+              CASE WHEN jsonb_array_length(oi.accessories) > 0
+                THEN ' [' || (SELECT string_agg(extra->>'name', ', ')
+                              FROM jsonb_array_elements(oi.accessories) AS extras(extra)) || ']'
+                ELSE '' END,
+            ', ' ORDER BY oi.id
+          ),
           ''
         ) AS items
        FROM orders o
@@ -58,6 +65,6 @@ export async function GET(
     statusStep: STATUS_STEPS[order.status] ?? 0,
     items: order.items,
     type: order.order_type,
-    eta: order.status === "delivered" ? "Delivered" : "~30–45 mins",
+    message: "Cu avi fami, si metta 'ntra fila!",
   }, { headers: { "Cache-Control": "no-store" } });
 }

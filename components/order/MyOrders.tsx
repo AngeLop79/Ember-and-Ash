@@ -16,16 +16,20 @@ type PersonalOrder = {
   status: OrderStatus;
   total: number;
   subtotal: number;
-  deliveryFee: number;
   type: "delivery" | "pickup" | "dine-in";
   createdAt: string;
-  address: string | null;
   paymentMethod: string;
   whatsappStatus: NotificationStatus | null;
-  items: { name: string; quantity: number; unitPrice: number; notes: string | null }[];
+  items: {
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    notes: string | null;
+    accessories: { id: string; name: string; description: string }[];
+  }[];
 };
 
-const TYPES = { delivery: "Consegna a domicilio", pickup: "Ritiro in sede", "dine-in": "Consumo al ristorante" };
+const TYPES = { delivery: "Ordine precedente", pickup: "Ritiro in sede", "dine-in": "Consumo al ristorante" };
 const PAYMENTS: Record<string, string> = { card: "Carta (simulata)", cash: "Contanti", transfer: "Bonifico (simulato)" };
 
 export default function MyOrders() {
@@ -107,7 +111,16 @@ export default function MyOrders() {
               {new Date(order.createdAt).toLocaleString("it-IT")} · {TYPES[order.type]}
             </p>
             <ul style={{ paddingLeft: "18px", marginBottom: "16px" }}>
-              {order.items.map((item, index) => <li key={index}>{item.quantity} x {item.name}</li>)}
+              {order.items.map((item, index) => (
+                <li key={index}>
+                  {item.quantity} x {item.name}
+                  {!!item.accessories?.length && (
+                    <span style={{ display: "block", color: "#D4A843", fontSize: "12px" }}>
+                      Accessori gratuiti: {item.accessories.map(({ name }) => name).join(", ")}
+                    </span>
+                  )}
+                </li>
+              ))}
             </ul>
             <p style={{ fontWeight: 700, fontSize: "20px", marginBottom: "16px" }}>Totale {formatPrice(order.total)}</p>
             <p style={{ marginBottom: "16px" }}>{order.paymentStatus === "paid" ? "Pagato" : order.status === "cancelled" ? "Annullato" : "Da pagare in cassa"}</p>
@@ -119,11 +132,15 @@ export default function MyOrders() {
                   <p key={index}>
                     {item.quantity} x {item.name}: {formatPrice(item.unitPrice * item.quantity)}
                     {item.notes && <span style={{ display: "block", color: "#8A7566" }}>Note: {item.notes}</span>}
+                    {!!item.accessories?.length && (
+                      <span style={{ display: "block", color: "#D4A843" }}>
+                        Accessori gratuiti: {item.accessories.map(({ name }) => name).join(", ")}
+                      </span>
+                    )}
                   </p>
                 ))}
-                <p>Piatti: {formatPrice(order.subtotal)} · Consegna: {formatPrice(order.deliveryFee)}</p>
+                <p>Piatti: {formatPrice(order.subtotal)}</p>
                 <p>Pagamento: {PAYMENTS[order.paymentMethod]}</p>
-                {order.address && <p>Indirizzo: {order.address}</p>}
                 {whatsappEnabled && <p>{notificationMessage(order.whatsappStatus)}</p>}
               </div>
             </details>

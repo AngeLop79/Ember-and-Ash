@@ -17,11 +17,17 @@ export async function GET(request: Request) {
   try {
     const result = await getDb().query(
       `SELECT o.id, o.public_code AS "publicCode", o.payment_status AS "paymentStatus", o.customer_name AS customer,
-        string_agg(oi.name || ' ×' || oi.quantity, ', ' ORDER BY oi.id) AS items,
+        (SELECT string_agg(
+          oi.name || ' ×' || oi.quantity ||
+            CASE WHEN jsonb_array_length(oi.accessories) > 0
+              THEN ' [' || (SELECT string_agg(extra->>'name', ', ')
+                            FROM jsonb_array_elements(oi.accessories) AS extras(extra)) || ']'
+              ELSE '' END,
+          ', ' ORDER BY oi.id
+        ) FROM order_items oi WHERE oi.order_id = o.id) AS items,
         o.total, o.order_type AS type, o.status, o.created_at AS time,
         o.customer_phone AS phone, n.status AS "whatsappStatus"
        FROM orders o
-       JOIN order_items oi ON oi.order_id = o.id
        LEFT JOIN order_notifications n ON n.order_id = o.id
        GROUP BY o.id, n.status
        ORDER BY o.created_at DESC
@@ -36,7 +42,7 @@ export async function GET(request: Request) {
             ? "Dine-In"
             : order.type === "pickup"
               ? "Pickup"
-              : "Delivery",
+              : "Ordine precedente",
         time: new Date(order.time).toISOString(),
       })),
     }, { headers: { "Cache-Control": "no-store" } });

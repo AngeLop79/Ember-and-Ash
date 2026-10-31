@@ -8,13 +8,11 @@ import {
   formatPrice,
   buildWhatsAppOrderMessage,
   getWhatsAppUrl,
-  calculateDeliveryFee,
 } from "@/lib/utils";
 import { RESTAURANT_INFO } from "@/lib/data";
 import { CustomerInfo } from "@/types";
 import {
   ShoppingBag,
-  Truck,
   MapPin,
   CreditCard,
   Banknote,
@@ -85,8 +83,7 @@ export default function OrderPage() {
   }, [hasHydrated, isAuthenticated, router, user?.phone]);
 
   const sub = subtotal();
-  const deliveryFee = orderType === "delivery" ? calculateDeliveryFee(sub) : 0;
-  const total = sub + deliveryFee;
+  const total = sub;
 
   const currentLagosHour = Number(
     new Intl.DateTimeFormat("en-US", {
@@ -111,11 +108,6 @@ export default function OrderPage() {
     label: string;
     icon: React.ReactNode;
   }[] = [
-    {
-      val: "delivery",
-      label: "Consegna a domicilio",
-      icon: <Truck size={16} />,
-    },
     { val: "pickup", label: "Ritiro", icon: <MapPin size={16} /> },
     {
       val: "dine-in",
@@ -143,8 +135,8 @@ export default function OrderPage() {
     },
     {
       val: "cash",
-      label: "Pagamento alla consegna/ritiro",
-      sub: "Contanti alla consegna o al ritiro",
+      label: "Pagamento in cassa",
+      sub: "Contanti in cassa",
       icon: <Banknote size={20} />,
     },
   ];
@@ -194,7 +186,12 @@ export default function OrderPage() {
     setLoading(true);
     try {
       const body = JSON.stringify({
-        items: items.map(({ id, quantity, notes }) => ({ id, quantity, notes })),
+        items: items.map(({ id, quantity, notes, accessories }) => ({
+          id,
+          quantity,
+          notes,
+          accessoryIds: accessories?.map(({ id: accessoryId }) => accessoryId) ?? [],
+        })),
         customer: { ...customer, phone },
         type: orderType,
         paymentMethod,
@@ -268,9 +265,8 @@ export default function OrderPage() {
     const msg = buildWhatsAppOrderMessage(
       items,
       total,
-      orderType,
+      orderType === "dine-in" ? "dine-in" : "pickup",
       customer.name,
-      customer.address,
     );
     window.open(getWhatsAppUrl(msg), "_blank");
   };
@@ -336,6 +332,19 @@ export default function OrderPage() {
           <p style={{ color: "#D4A843", marginBottom: "16px" }} role="status">
             In attesa di conferma del ristorante. {whatsappEnabled && notificationMessage}
           </p>
+          <p style={{
+            color: "#F5EDD8",
+            background: "rgba(212,168,67,0.12)",
+            border: "1px solid rgba(212,168,67,0.28)",
+            borderRadius: "12px",
+            padding: "14px 18px",
+            margin: "0 auto 20px",
+            fontSize: "16px",
+            fontWeight: 700,
+            lineHeight: 1.5,
+          }}>
+            Cu avi fami, si metta &apos;ntra fila!
+          </p>
           <p
             style={{ color: "#8A7566", marginBottom: "8px", fontSize: "15px" }}
           >
@@ -376,7 +385,7 @@ export default function OrderPage() {
                   gap: "8px",
                 }}
               >
-                <Truck size={16} /> Visualizza ordine
+                <ShoppingBag size={16} /> Visualizza ordine
               </button>
             </Link>
             <Link href="/menu" style={{ textDecoration: "none" }}>
@@ -638,7 +647,7 @@ export default function OrderPage() {
                       >
                         {items.map((item) => (
                           <div
-                            key={item.id}
+                            key={item.cartId ?? item.id}
                             className="cart-item-row"
                             style={{
                               display: "flex",
@@ -677,6 +686,11 @@ export default function OrderPage() {
                               >
                                 {formatPrice(item.price)}
                               </p>
+                              {!!item.accessories?.length && (
+                                <p style={{ color: "#FFFFFF", fontSize: "13px", fontWeight: 600, lineHeight: 1.5, marginTop: "6px", overflowWrap: "anywhere" }}>
+                                  {item.accessories.map(({ name }) => name).join(" · ")}
+                                </p>
+                              )}
                             </div>
                             <div
                               className="cart-item-controls"
@@ -688,7 +702,7 @@ export default function OrderPage() {
                             >
                               <button
                                 onClick={() =>
-                                  updateQuantity(item.id, item.quantity - 1)
+                                  updateQuantity(item.cartId ?? item.id, item.quantity - 1)
                                 }
                                 style={{
                                   width: "28px",
@@ -718,7 +732,7 @@ export default function OrderPage() {
                               </span>
                               <button
                                 onClick={() =>
-                                  updateQuantity(item.id, item.quantity + 1)
+                                  updateQuantity(item.cartId ?? item.id, item.quantity + 1)
                                 }
                                 style={{
                                   width: "28px",
@@ -747,7 +761,7 @@ export default function OrderPage() {
                                 {formatPrice(item.price * item.quantity)}
                               </span>
                               <button
-                                onClick={() => removeItem(item.id)}
+                                onClick={() => removeItem(item.cartId ?? item.id)}
                                 style={{
                                   background: "transparent",
                                   border: "none",
@@ -941,32 +955,6 @@ export default function OrderPage() {
                       }
                     />
                   </div>
-                  {orderType === "delivery" && (
-                    <div>
-                      <label
-                        style={{
-                          fontSize: "12px",
-                          color: "#8A7566",
-                          display: "block",
-                          marginBottom: "6px",
-                          letterSpacing: "0.04em",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Indirizzo di consegna *
-                      </label>
-                      <textarea
-                        className="input-field"
-                        placeholder="Indirizzo completo, incluso il comune"
-                        rows={3}
-                        value={customer.address}
-                        onChange={(e) =>
-                          setCustomer({ ...customer, address: e.target.value })
-                        }
-                        style={{ resize: "vertical" }}
-                      />
-                    </div>
-                  )}
                 </div>
                 {!showPaymentStep && isRestaurantClosed && (
                   <p
@@ -999,10 +987,6 @@ export default function OrderPage() {
                     onClick={() => {
                       if (!customer.name || !customer.phone) {
                         toast.error("Compila i campi obbligatori");
-                        return;
-                      }
-                      if (orderType === "delivery" && !customer.address) {
-                        toast.error("Inserisci l’indirizzo di consegna");
                         return;
                       }
                       if (showPaymentStep) {
@@ -1527,11 +1511,16 @@ export default function OrderPage() {
               >
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.cartId ?? item.id}
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     <span style={{ fontSize: "13px", color: "#8A7566" }}>
                       {item.name} ×{item.quantity}
+                      {!!item.accessories?.length && (
+                        <span style={{ display: "block", color: "#FFFFFF", fontSize: "13px", fontWeight: 600, lineHeight: 1.5, marginTop: "4px", overflowWrap: "anywhere" }}>
+                          {item.accessories.map(({ name }) => name).join(" · ")}
+                        </span>
+                      )}
                     </span>
                     <span style={{ fontSize: "13px", color: "#F5EDD8" }}>
                       {formatPrice(item.price * item.quantity)}
@@ -1554,27 +1543,6 @@ export default function OrderPage() {
                   {formatPrice(sub)}
                 </span>
               </div>
-              {orderType === "delivery" && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "14px",
-                  }}
-                >
-                  <span style={{ fontSize: "13px", color: "#8A7566" }}>
-                    Consegna
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: deliveryFee === 0 ? "#D4A843" : "#F5EDD8",
-                    }}
-                  >
-                    {deliveryFee === 0 ? "Gratuita" : formatPrice(deliveryFee)}
-                  </span>
-                </div>
-              )}
               <div className="divider" style={{ marginBottom: "12px" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontWeight: 700, color: "#F5EDD8" }}>Totale</span>
@@ -1598,17 +1566,14 @@ export default function OrderPage() {
                   border: "1px solid #3D3028",
                 }}
               >
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "#8A7566",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  🕒 Tempo stimato:{" "}
-                  <span style={{ color: "#F5EDD8" }}>30–45 min</span> per la
-                  consegna, <span style={{ color: "#F5EDD8" }}>15–20 min</span>{" "}
-                  per il ritiro
+                <p style={{
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  color: "#F5EDD8",
+                  lineHeight: 1.6,
+                  textAlign: "center",
+                }}>
+                  Cu avi fami, si metta &apos;ntra fila!
                 </p>
               </div>
             </div>

@@ -6,6 +6,7 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 
 - Scopri un menu ispirato alla cucina nigeriana, con categorie, specialità e schede dei piatti.
 - Aggiungi piatti al carrello, modifica le quantità e controlla i prezzi prima di confermare l'ordine.
+- Personalizza i prodotti con accessori gratuiti configurabili e salva le scelte insieme alle singole righe dell'ordine.
 - Salva gli ordini con modalità d'ordine configurabili e segui il loro stato.
 - Scegli tra i metodi di pagamento abilitati; i pagamenti sono simulati.
 - Prenota un tavolo tramite il modulo dedicato o WhatsApp.
@@ -16,19 +17,27 @@ Ember & Ash è un'applicazione web per ristoranti realizzata con Next.js. Offre 
 - Ricevi il riepilogo ordine via WhatsApp Business Platform, con consenso facoltativo e configurazione Meta.
 - Accedi con email e password oppure con Google; il telefono italiano è obbligatorio per usare l'account.
 - Usa l'accesso staff separato per il pannello di amministrazione.
-- Gestisci gli ordini salvati, le prenotazioni e le voci del menu dall'area admin.
+- Gestisci gli ordini salvati, le prenotazioni, le voci del menu e gli accessori dall'area admin.
 
 La funzionalità di prenotazione è controllata da `NEXT_PUBLIC_RESERVATIONS_ENABLED` nel file `.env`: impostala a `false` per nascondere la prenotazione sul sito e nell'area admin e reindirizzare `/reservations` alla home. Il valore predefinito è `true`; essendo una variabile `NEXT_PUBLIC_`, le modifiche richiedono un nuovo build e deploy.
 
 Le modalità d'ordine e i metodi di pagamento si configurano con le variabili
-`NEXT_PUBLIC_ORDER_DELIVERY_ENABLED`, `NEXT_PUBLIC_ORDER_PICKUP_ENABLED`,
+`NEXT_PUBLIC_ORDER_PICKUP_ENABLED`,
 `NEXT_PUBLIC_ORDER_DINE_IN_ENABLED`, `NEXT_PUBLIC_ORDER_PAYMENT_CASH_ENABLED`,
 `NEXT_PUBLIC_ORDER_PAYMENT_CARD_ENABLED` e
 `NEXT_PUBLIC_ORDER_PAYMENT_TRANSFER_ENABLED`. L'impostazione predefinita abilita
-solo il ritiro e il pagamento in contanti. Quando è attiva una sola modalità o un
+solo il ritiro e il pagamento in contanti. La consegna è disattivata a livello
+applicativo per questa edizione; `NEXT_PUBLIC_ORDER_DELIVERY_ENABLED` viene
+ignorata e gli ordini storici restano consultabili. Quando è attiva una sola modalità o un
 solo metodo, viene preselezionato e il relativo passaggio di scelta viene saltato.
 Il server rifiuta gli ordini che usano modalità o pagamenti disattivati. Queste
 variabili `NEXT_PUBLIC_` richiedono un nuovo build e deploy.
+
+Gli accessori si configurano da **Accessori e personalizzazioni** nell'area admin:
+la funzione può essere sospesa globalmente o per singolo prodotto senza perdere
+accessori e associazioni. Le selezioni sono salvate come fotografia per riga
+d'ordine e non modificano i prezzi. Applica la migrazione
+`database/migrations/20261030_order_accessories.sql` con `npm run db:migrate`.
 
 ## Valuta e prezzi
 

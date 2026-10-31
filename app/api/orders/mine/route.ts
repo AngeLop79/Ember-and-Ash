@@ -31,7 +31,8 @@ export async function GET(request: Request) {
         o.order_type AS type, o.created_at AS "createdAt", o.created_at::text AS "cursorTime", o.customer_address AS address,
         o.payment_method AS "paymentMethod", n.status AS "whatsappStatus",
         COALESCE(json_agg(json_build_object(
-          'name', i.name, 'quantity', i.quantity, 'unitPrice', i.unit_price, 'notes', i.notes
+          'name', i.name, 'quantity', i.quantity, 'unitPrice', i.unit_price, 'notes', i.notes,
+          'accessories', i.accessories
         ) ORDER BY i.id) FILTER (WHERE i.id IS NOT NULL), '[]') AS items
        FROM orders o LEFT JOIN order_items i ON i.order_id = o.id
        LEFT JOIN order_notifications n ON n.order_id = o.id

@@ -30,11 +30,11 @@ export function orderTemplateParameters(order: OrderDetails): string[] {
     order.customer,
     order.publicCode,
     order.items.map((item) =>
-      `${item.quantity} x ${item.name} (${formatPrice(item.quantity * item.unitPrice)})${item.notes ? ` - ${item.notes}` : ""}`,
+      `${item.quantity} x ${item.name} (${formatPrice(item.quantity * item.unitPrice)})${item.accessories?.length ? ` [${item.accessories.map(({ name }) => name).join(", ")}]` : ""}${item.notes ? ` - ${item.notes}` : ""}`,
     ).join("; "),
     formatPrice(order.total),
     ORDER_TYPES[order.type],
-    order.address || "Non previsto",
+    "Non previsto",
     `${orderStatusLabel(order.status, order.type)}; ${order.paymentStatus === "paid" ? "pagato" : order.status === "cancelled" ? "annullato" : "da pagare in cassa"}`,
   ].map((text) => text.replace(/\s+/g, " ").trim());
 }

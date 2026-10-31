@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
 import { useFeatureStore } from "@/store/featureStore";
+import { useAccessoryStore } from "@/store/accessoryStore";
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,9 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     const refresh = () => {
       void useFeatureStore.getState().loadFeatures().catch((error: unknown) => {
         toast.error(error instanceof Error ? error.message : "Configurazione non disponibile.");
+      });
+      void useAccessoryStore.getState().load().catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : "Personalizzazioni non disponibili.");
       });
     };
     refresh();

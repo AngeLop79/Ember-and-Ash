@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import type { PoolClient } from "pg";
 import { MENU_ITEMS } from "@/lib/data";
 import { getDb } from "@/lib/db";
-import { calculateDeliveryFee, formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import { CartItem, CustomerInfo } from "@/types";
 import { getCustomer } from "@/lib/customerAuth";
 import { isSameOrigin } from "@/lib/requestOrigin";
@@ -20,7 +20,7 @@ import {
 export const runtime = "nodejs";
 
 type OrderRequest = {
-  items: { id: string; quantity: number; notes?: string }[];
+  items: { id: string; quantity: number; notes?: string; accessoryIds: string[] }[];
   customer: CustomerInfo;
   type: OrderType;
   paymentMethod: PaymentMethod;
@@ -55,7 +55,12 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
       (item.quantity as number) < 1 ||
       (item.quantity as number) > 100 ||
       (item.notes !== undefined &&
-        (typeof item.notes !== "string" || item.notes.length > 500))
+        (typeof item.notes !== "string" || item.notes.length > 500)) ||
+      (item.accessoryIds !== undefined &&
+        (!Array.isArray(item.accessoryIds) ||
+          item.accessoryIds.length > 20 ||
+          !item.accessoryIds.every((id) => typeof id === "string" && id.length <= 100) ||
+          new Set(item.accessoryIds).size !== item.accessoryIds.length))
     ) {
       return null;
     }
@@ -63,6 +68,7 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
       id: item.id,
       quantity: item.quantity as number,
       notes: item.notes as string | undefined,
+      accessoryIds: (item.accessoryIds as string[] | undefined) ?? [],
     });
   }
 
@@ -82,7 +88,6 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
     phone.length > 40 ||
     email.length > 254 ||
     address.length > 500 ||
-    (type === "delivery" && address.length === 0) ||
     (email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
   ) {
     return null;
@@ -138,6 +143,37 @@ export async function POST(request: Request) {
 
   const menuById = new Map(MENU_ITEMS.map((item) => [item.id, item]));
   const pricedItems: (CartItem & { quantity: number })[] = [];
+  const requestedAccessoryIds = [...new Set(order.items.flatMap((item) => item.accessoryIds))];
+  let accessoriesByProduct = new Map<string, { id: string; name: string; description: string }>();
+
+  if (requestedAccessoryIds.length > 0) {
+    try {
+      const feature = await getDb().query<{ enabled: boolean }>(
+        "SELECT enabled FROM accessory_settings WHERE id = 1",
+      );
+      if (!feature.rows[0]?.enabled) {
+        return Response.json({ error: "Le personalizzazioni non sono attualmente disponibili." }, { status: 400 });
+      }
+      const availableAccessories = await getDb().query<{
+        menuItemId: string; id: string; name: string; description: string;
+      }>(
+        `SELECT ap.menu_item_id AS "menuItemId", a.id, a.name, a.description
+         FROM accessory_products ap
+         JOIN accessories a ON a.id = ap.accessory_id AND a.available = TRUE
+         JOIN accessory_product_settings ps
+           ON ps.menu_item_id = ap.menu_item_id AND ps.enabled = TRUE
+         WHERE a.id = ANY($1::text[])`,
+        [requestedAccessoryIds],
+      );
+      accessoriesByProduct = new Map(availableAccessories.rows.map((accessory) => [
+        `${accessory.menuItemId}:${accessory.id}`,
+        { id: accessory.id, name: accessory.name, description: accessory.description },
+      ]));
+    } catch (error) {
+      console.error("Failed to validate order accessories.", error);
+      return Response.json({ error: "Impossibile verificare le personalizzazioni." }, { status: 503 });
+    }
+  }
 
   for (const requestedItem of order.items) {
     const menuItem = menuById.get(requestedItem.id);
@@ -147,10 +183,17 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    const accessories = requestedItem.accessoryIds.map((accessoryId) =>
+      accessoriesByProduct.get(`${menuItem.id}:${accessoryId}`),
+    );
+    if (accessories.some((accessory) => !accessory)) {
+      return Response.json({ error: "Una personalizzazione selezionata non è più disponibile per questo prodotto." }, { status: 400 });
+    }
     pricedItems.push({
       ...menuItem,
       quantity: requestedItem.quantity,
       notes: requestedItem.notes,
+      accessories: accessories as NonNullable<CartItem["accessories"]>,
     });
   }
 
@@ -158,8 +201,7 @@ export async function POST(request: Request) {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  const deliveryFee =
-    order.type === "delivery" ? calculateDeliveryFee(subtotal) : 0;
+  const deliveryFee = 0;
   const total = subtotal + deliveryFee;
   const notify = whatsappOrderNotificationsEnabled() && order.whatsappConsent;
   let id = `EA-${randomBytes(8).toString("hex").toUpperCase()}`;
@@ -224,20 +266,19 @@ export async function POST(request: Request) {
       for (const item of pricedItems) {
         await client.query(
           `INSERT INTO order_items (
-            order_id, menu_item_id, name, unit_price, quantity, notes
-          ) VALUES ($1, $2, $3, $4, $5, $6)`,
-          [id, item.id, item.name, item.price, item.quantity, item.notes || null],
+            order_id, menu_item_id, name, unit_price, quantity, notes, accessories
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+          [id, item.id, item.name, item.price, item.quantity, item.notes || null, JSON.stringify(item.accessories ?? [])],
         );
       }
 
       if (notify) {
-        const type = order.type === "delivery" ? "Consegna a domicilio" :
-          order.type === "pickup" ? "Ritiro in sede" : "Consumo al ristorante";
+        const type = order.type === "pickup" ? "Ritiro in sede" : "Consumo al ristorante";
         const parameters = [
           order.customer.name,
           id,
           pricedItems.map((item) =>
-            `${item.quantity} x ${item.name} (${formatPrice(item.price * item.quantity)})${item.notes ? ` - ${item.notes}` : ""}`,
+            `${item.quantity} x ${item.name} (${formatPrice(item.price * item.quantity)})${item.accessories?.length ? ` [${item.accessories.map(({ name }) => name).join(", ")}]` : ""}${item.notes ? ` - ${item.notes}` : ""}`,
           ).join("; "),
           formatPrice(total),
           type,

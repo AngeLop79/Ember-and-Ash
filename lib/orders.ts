@@ -17,7 +17,13 @@ export type OrderDetails = {
   receivedPaymentMethod: "cash" | "card" | "transfer" | null;
   createdAt: Date;
   address: string | null;
-  items: { name: string; quantity: number; unitPrice: number; notes: string | null }[];
+  items: {
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    notes: string | null;
+    accessories: { id: string; name: string; description: string }[];
+  }[];
 };
 
 export async function getOrderDetails(id: string): Promise<OrderDetails | null> {
@@ -29,7 +35,8 @@ export async function getOrderDetails(id: string): Promise<OrderDetails | null> 
       o.received_payment_method AS "receivedPaymentMethod",
       o.created_at AS "createdAt", o.customer_address AS address,
       COALESCE(json_agg(json_build_object(
-        'name', i.name, 'quantity', i.quantity, 'unitPrice', i.unit_price, 'notes', i.notes
+        'name', i.name, 'quantity', i.quantity, 'unitPrice', i.unit_price, 'notes', i.notes,
+        'accessories', i.accessories
       ) ORDER BY i.id) FILTER (WHERE i.id IS NOT NULL), '[]') AS items
      FROM orders o LEFT JOIN order_items i ON i.order_id = o.id
      WHERE o.id = $1 GROUP BY o.id`,

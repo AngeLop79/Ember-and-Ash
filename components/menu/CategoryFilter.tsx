@@ -13,19 +13,27 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   return (
     <div
-      className="flex w-full max-w-full flex-wrap gap-2 overflow-x-hidden pb-2 sm:flex-nowrap sm:overflow-x-auto"
+      className="flex w-full max-w-full flex-wrap overflow-x-hidden sm:flex-nowrap sm:overflow-x-auto"
       style={{
         scrollbarWidth: "none",
+        gap: "10px",
+        padding: "4px 0 12px",
       }}
     >
       {CATEGORIES.map((cat) => (
         <button
           key={cat.id}
+          type="button"
+          aria-pressed={active === cat.id}
           onClick={() => onChange(cat.id)}
-          className="shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-semibold transition-all sm:px-4"
+          className="shrink-0 whitespace-nowrap text-[13px] font-semibold transition-all"
           style={{
+            padding: "10px 18px",
+            minHeight: "44px",
+            borderRadius: "999px",
+            lineHeight: 1.4,
             cursor: "pointer",
-            border: active === cat.id ? "none" : "1px solid #3D3028",
+            border: `1px solid ${active === cat.id ? "#E8541A" : "#3D3028"}`,
             background: active === cat.id ? "#E8541A" : "transparent",
             color: active === cat.id ? "white" : "#8A7566",
           }}

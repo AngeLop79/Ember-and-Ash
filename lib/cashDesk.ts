@@ -56,11 +56,11 @@ export async function changeOrder(
         alreadyProcessed = true;
       } else if (target === "delivered") {
         if (order.payment_status !== "paid") {
-          throw new OrderActionError("Registra il pagamento prima della consegna o del ritiro.", 409);
+          throw new OrderActionError("Registra il pagamento prima di completare il ritiro.", 409);
         }
         if (!isOrderCollectable(order.status, order.order_type)) {
           throw new OrderActionError(
-            order.order_type === "delivery" ? "L'ordine deve essere in consegna." : "L'ordine deve essere pronto per il ritiro.",
+            "L'ordine deve essere pronto per il ritiro.",
             409,
           );
         }
@@ -69,7 +69,7 @@ export async function changeOrder(
         );
       } else if (target === "cancelled") {
         if (order.status === "delivered" || order.payment_status === "paid") {
-          throw new OrderActionError("Ordine pagato o gia' consegnato: l'annullamento richiede una gestione rimborso separata.", 409);
+          throw new OrderActionError("Ordine pagato o gia' completato: l'annullamento richiede una gestione rimborso separata.", 409);
         }
         await client.query("UPDATE orders SET status = 'cancelled' WHERE id = $1", [order.id]);
       } else {

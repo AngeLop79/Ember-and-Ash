@@ -110,7 +110,7 @@ export function CashActions({ id, status, type, paymentStatus, total }: {
   const act = async (action: "pay" | "collect") => {
     const prompt = action === "pay"
       ? `Confermi di avere ricevuto ${formatPrice(total)} tramite ${PAYMENT_METHODS[method]}? Questa operazione registra un incasso, non esegue addebiti.`
-      : "Confermi di avere consegnato questo ordine al cliente?";
+      : "Confermi di avere completato il ritiro di questo ordine?";
     if (!window.confirm(prompt)) return;
     setBusy(true);
     setError("");
@@ -151,13 +151,13 @@ export function CashActions({ id, status, type, paymentStatus, total }: {
         <button className="btn-ember" onClick={() => act("pay")} disabled={busy}>Registra pagamento · {formatPrice(total)}</button>
       </>}
       {!closed && <button className="btn-ember" onClick={() => act("collect")} disabled={busy || !canCollect}>
-        {type === "delivery" ? "Segna consegnato" : "Segna ritirato"}
+        Segna ritiro completato
       </button>}
       {!closed && !canCollect && <p style={{ color: "#8A7566" }}>
-        Occorrono pagamento registrato e ordine {type === "delivery" ? "in consegna" : "pronto"}.
+        Occorrono pagamento registrato e ordine pronto.
         La preparazione si gestisce dalla scheda Ordini nell&apos;amministrazione.
       </p>}
-      {closed && <p>{status === "cancelled" ? "Ordine annullato." : "Consegna gia' registrata: non consegnare una seconda volta."}</p>}
+      {closed && <p>{status === "cancelled" ? "Ordine annullato." : "Ritiro già registrato: non ripeterlo."}</p>}
       <button className="btn-ghost" disabled={busy} onClick={() => router.refresh()}>Aggiorna ordine</button>
     </section>
   );

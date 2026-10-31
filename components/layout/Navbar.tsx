@@ -147,7 +147,7 @@ export default function Navbar() {
           >
             <Flame size={22} color="#E8541A" />
             <span className="site-brand-copy">
-              <span className="font-display logo-text">XIII Sagra del Maiale</span>
+              <span className="font-display logo-text">Sagra del Maiale</span>
               <span className="site-brand-organizer">I Ragazzi del Sole</span>
             </span>
           </Link>
@@ -183,6 +183,11 @@ export default function Navbar() {
               style={{ position: "relative" }}
             >
               <button
+                type="button"
+                aria-label={isAuthenticated ? "Apri il menu del profilo" : "Accedi"}
+                aria-expanded={accountOpen}
+                aria-haspopup="menu"
+                className="account-toggle"
                 onClick={() => setAccountOpen((prev) => !prev)}
                 style={{
                   fontSize: "12px",
@@ -205,8 +210,22 @@ export default function Navbar() {
                   cursor: "pointer",
                 }}
               >
-                <User size={14} />
-                <span suppressHydrationWarning>
+                <span className="account-icon" style={{ position: "relative", display: "flex" }}>
+                  <User size={16} />
+                  {isAuthenticated && (
+                    <span aria-label="Sessione attiva" style={{
+                      position: "absolute",
+                      width: "7px",
+                      height: "7px",
+                      right: "-4px",
+                      bottom: "-2px",
+                      borderRadius: "50%",
+                      background: "#34D399",
+                      border: "1px solid #1A1612",
+                    }} />
+                  )}
+                </span>
+                <span className="account-label" suppressHydrationWarning>
                   {isAuthenticated && user?.name
                     ? user.name.split(" ")[0]
                     : "Accedi"}
@@ -263,6 +282,11 @@ export default function Navbar() {
                         >
                           {user?.name || "Profilo"}
                         </span>
+                        {user?.email && (
+                          <span style={{ fontSize: "12px", color: "#8A7566", overflowWrap: "anywhere" }}>
+                            {user.email}
+                          </span>
+                        )}
                       </div>
 
                       <div
@@ -303,7 +327,7 @@ export default function Navbar() {
                       }}
                     >
                       <Link
-                        href="/auth?mode=signup"
+                        href="/auth"
                         onClick={() => setAccountOpen(false)}
                         style={{
                           textDecoration: "none",
@@ -319,7 +343,7 @@ export default function Navbar() {
                         Accedi
                       </Link>
                       <Link
-                        href="/auth"
+                        href="/auth?mode=signup"
                         onClick={() => setAccountOpen(false)}
                         style={{
                           textDecoration: "none",
@@ -423,7 +447,7 @@ export default function Navbar() {
           <Link href="/" className="mobile-navigation-brand" onClick={() => setMobileOpen(false)}>
             <Flame size={22} color="#E8541A" aria-hidden="true" />
             <span className="site-brand-copy">
-              <span className="font-display logo-text">XIII Sagra del Maiale</span>
+              <span className="font-display logo-text">Sagra del Maiale</span>
               <span className="site-brand-organizer">I Ragazzi del Sole</span>
             </span>
           </Link>
@@ -499,14 +523,16 @@ export default function Navbar() {
           min-width: 0;
           flex-direction: column;
           gap: 3px;
+          overflow: hidden;
         }
         .site-brand-organizer {
-          color: #8A7566;
-          font-size: 9px;
-          font-weight: 600;
-          letter-spacing: 0.11em;
-          line-height: 1.2;
-          text-transform: uppercase;
+          color: #D4A843;
+          font-family: var(--font-display);
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          line-height: 1.15;
+          white-space: nowrap;
         }
         .site-navbar {
           background: rgba(26,22,18,0.92);
@@ -661,16 +687,24 @@ export default function Navbar() {
         }
 
         @media (max-width: 768px) {
-          .site-brand-organizer { display: none; }
+          .site-brand-organizer { font-size: 12px; letter-spacing: 0.04em; }
           .logo-text { font-size: 17px; }
+          .site-navbar > div > div:last-child { gap: 8px !important; }
+          .site-brand-copy > .logo-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .site-navbar { background: var(--ash); backdrop-filter: none; }
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
-          .account-link { display: none !important; }
+          .account-toggle {
+            width: 40px;
+            height: 40px;
+            padding: 8px !important;
+            justify-content: center;
+          }
+          .account-label { display: none; }
         }
 
         @media (max-width: 420px) {
-          .logo-text { font-size: 16px; }
+          .logo-text { font-size: 15px; }
         }
       `}</style>
     </>
