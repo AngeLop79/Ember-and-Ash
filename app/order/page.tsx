@@ -330,7 +330,7 @@ export default function OrderPage() {
             Ordine ricevuto!
           </h1>
           <p style={{ color: "#D4A843", marginBottom: "16px" }} role="status">
-            In attesa di conferma del ristorante. {whatsappEnabled && notificationMessage}
+            In attesa di conferma delle cucine!. {whatsappEnabled && notificationMessage}
           </p>
           <p style={{
             color: "#F5EDD8",
@@ -343,7 +343,7 @@ export default function OrderPage() {
             fontWeight: 700,
             lineHeight: 1.5,
           }}>
-            Cu avi fami, si metta &apos;ntra fila!
+            Il maiale, il migliore amico dell’uomo!
           </p>
           <p
             style={{ color: "#8A7566", marginBottom: "8px", fontSize: "15px" }}

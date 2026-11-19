@@ -19,7 +19,7 @@ import { useAccessoryStore } from "@/store/accessoryStore";
 import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 
-const FEATURED = MENU_ITEMS.filter((i) => i.featured).slice(0, 4);
+const FEATURED = MENU_ITEMS.filter((i) => i.featured);
 
 export default function HomePage() {
   const router = useRouter();
@@ -161,7 +161,7 @@ export default function HomePage() {
             lineHeight: 1.5,
           }}>
             Le ordinazioni chiudono alle{" "}
-            <strong style={{ color: "#D4A843" }}>19:00 del 12 dicembre</strong>
+            <strong style={{ color: "#D4A843" }}>19:00 del 12 Dicembre</strong>
           </p>
           <p className="home-organizer" style={{ marginTop: "18px" }}>
             Associazione I Ragazzi del Sole
@@ -552,7 +552,7 @@ export default function HomePage() {
               }}
             >
               Preferisci scriverci? Contattaci direttamente: confermeremo il tuo
-              ordine e ti terremo aggiornato in ogni fase.
+              ordine e ti terremo aggiornato.
             </p>
           </div>
           <button

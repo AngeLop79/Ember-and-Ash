@@ -9,7 +9,10 @@ export default function MenuPage() {
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
   const filtered = MENU_ITEMS.filter((item) => {
-    const matchCat = category === "all" || item.category === category;
+    const matchCat =
+      category === "all"
+        ? item.category !== "drinks"
+        : item.category === category;
     const matchSearch =
       search === "" ||
       item.name.toLowerCase().includes(search.toLowerCase()) ||
