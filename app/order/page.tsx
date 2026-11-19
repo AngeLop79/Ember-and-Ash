@@ -32,6 +32,7 @@ import {
   type OrderType,
   type PaymentMethod,
 } from "@/lib/orderConfig";
+import { isPickupTime, PICKUP_TIMES } from "@/lib/pickupTimes";
 
 type Step = "cart" | "details" | "payment" | "confirm";
 
@@ -45,6 +46,7 @@ export default function OrderPage() {
   const [orderType, setOrderType] = useState<OrderType>(
     ENABLED_ORDER_TYPES[0] ?? "pickup",
   );
+  const [pickupTime, setPickupTime] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
     ENABLED_PAYMENT_METHODS[0] ?? "cash",
   );
@@ -150,6 +152,10 @@ export default function OrderPage() {
 
   const handlePlaceOrder = async () => {
     if (loading) return;
+    if (orderType === "pickup" && !isPickupTime(pickupTime)) {
+      toast.error("Seleziona un orario di ritiro.");
+      return;
+    }
     const phone = normalizeItalianPhone(customer.phone);
     if (!phone) {
       toast.error("Inserisci un numero di telefono italiano valido con prefisso +39.");
@@ -194,6 +200,7 @@ export default function OrderPage() {
         })),
         customer: { ...customer, phone },
         type: orderType,
+        pickupTime: orderType === "pickup" ? pickupTime : null,
         paymentMethod,
         whatsappConsent: whatsappEnabled && whatsappConsent !== false,
       });
@@ -262,11 +269,16 @@ export default function OrderPage() {
 
   const handleWhatsApp = () => {
     if (!guardWhatsAppAccess()) return;
+    if (orderType === "pickup" && !isPickupTime(pickupTime)) {
+      toast.error("Seleziona un orario di ritiro.");
+      return;
+    }
     const msg = buildWhatsAppOrderMessage(
       items,
       total,
       orderType === "dine-in" ? "dine-in" : "pickup",
       customer.name,
+      orderType === "pickup" ? pickupTime : null,
     );
     window.open(getWhatsAppUrl(msg), "_blank");
   };
@@ -332,6 +344,11 @@ export default function OrderPage() {
           <p style={{ color: "#D4A843", marginBottom: "16px" }} role="status">
             In attesa di conferma delle cucine!. {whatsappEnabled && notificationMessage}
           </p>
+          {orderType === "pickup" && pickupTime && (
+            <p style={{ color: "#F5EDD8", marginBottom: "16px", fontWeight: 600 }}>
+              Orario di ritiro richiesto: {pickupTime}
+            </p>
+          )}
           <p style={{
             color: "#F5EDD8",
             background: "rgba(212,168,67,0.12)",
@@ -590,7 +607,10 @@ export default function OrderPage() {
                             .map(({ val, label, icon }) => (
                               <button
                                 key={val}
-                                onClick={() => setOrderType(val)}
+                                onClick={() => {
+                                  setOrderType(val);
+                                  if (val !== "pickup") setPickupTime("");
+                                }}
                                 className="order-type-btn"
                                 style={{
                                   padding: "10px 20px",
@@ -618,6 +638,40 @@ export default function OrderPage() {
                               </button>
                             ))}
                         </div>
+                      </div>
+                    )}
+
+                    {orderType === "pickup" && (
+                      <div
+                        className="card"
+                        style={{ padding: "20px", marginBottom: "20px" }}
+                      >
+                        <label
+                          htmlFor="pickup-time"
+                          style={{
+                            display: "block",
+                            color: "#F5EDD8",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            marginBottom: "10px",
+                          }}
+                        >
+                          Orario di ritiro *
+                        </label>
+                        <select
+                          id="pickup-time"
+                          className="input-field"
+                          value={pickupTime}
+                          onChange={(event) => setPickupTime(event.target.value)}
+                          required
+                        >
+                          <option value="">Seleziona un orario</option>
+                          {PICKUP_TIMES.map((time) => (
+                            <option key={time} value={time}>
+                              {time}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
 
@@ -809,6 +863,10 @@ export default function OrderPage() {
                           if (!isAuthenticated) {
                             toast.error("Accedi prima di completare l’ordine");
                             router.push("/auth?next=/order");
+                            return;
+                          }
+                          if (orderType === "pickup" && !isPickupTime(pickupTime)) {
+                            toast.error("Seleziona un orario di ritiro.");
                             return;
                           }
                           if (user) {

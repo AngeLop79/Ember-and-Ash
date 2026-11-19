@@ -8,6 +8,7 @@ export type OrderDetails = {
   customer: string;
   status: OrderStatus;
   type: "delivery" | "pickup" | "dine-in";
+  pickupTime: string | null;
   total: number;
   subtotal: number;
   deliveryFee: number;
@@ -30,6 +31,7 @@ export async function getOrderDetails(id: string): Promise<OrderDetails | null> 
   const result = await getDb().query<OrderDetails>(
     `SELECT o.id, o.public_code AS "publicCode", o.customer_id AS "customerId",
       o.customer_name AS customer, o.status, o.order_type AS type, o.total, o.subtotal,
+      o.pickup_time AS "pickupTime",
       o.delivery_fee AS "deliveryFee", o.payment_status AS "paymentStatus",
       o.paid_at AS "paidAt", o.collected_at AS "collectedAt",
       o.received_payment_method AS "receivedPaymentMethod",

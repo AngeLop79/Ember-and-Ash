@@ -16,6 +16,7 @@ import {
   type OrderType,
   type PaymentMethod,
 } from "@/lib/orderConfig";
+import { isPickupTime } from "@/lib/pickupTimes";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,7 @@ type OrderRequest = {
   items: { id: string; quantity: number; notes?: string; accessoryIds: string[] }[];
   customer: CustomerInfo;
   type: OrderType;
+  pickupTime: string | null;
   paymentMethod: PaymentMethod;
   whatsappConsent: boolean;
 };
@@ -43,6 +45,14 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
     !isEnabledPaymentMethod(paymentMethod) ||
     (value.whatsappConsent !== undefined && typeof value.whatsappConsent !== "boolean")
   ) {
+    return null;
+  }
+
+  let pickupTime: string | null = null;
+  if (type === "pickup") {
+    if (!isPickupTime(value.pickupTime)) return null;
+    pickupTime = value.pickupTime;
+  } else if (value.pickupTime !== undefined && value.pickupTime !== null) {
     return null;
   }
 
@@ -97,6 +107,7 @@ function parseOrderRequest(value: unknown): OrderRequest | null {
     items: normalizedItems,
     customer: { name: customerName, phone: normalizedPhone, email, address },
     type,
+    pickupTime,
     paymentMethod,
     whatsappConsent: value.whatsappConsent === true,
   };
@@ -240,9 +251,9 @@ export async function POST(request: Request) {
       const inserted = await client.query<{ publicCode: string }>(
         `INSERT INTO orders (
           id, customer_name, customer_phone, customer_email, customer_address,
-          order_type, subtotal, delivery_fee, total, payment_method,
+          order_type, pickup_time, subtotal, delivery_fee, total, payment_method,
           customer_id, request_key, request_hash, whatsapp_consent_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING public_code AS "publicCode"`,
         [
           id,
@@ -251,6 +262,7 @@ export async function POST(request: Request) {
           order.customer.email || null,
           order.customer.address || null,
           order.type,
+          order.pickupTime,
           subtotal,
           deliveryFee,
           total,
@@ -273,7 +285,10 @@ export async function POST(request: Request) {
       }
 
       if (notify) {
-        const type = order.type === "pickup" ? "Ritiro in sede" : "Consumo al ristorante";
+        const orderTypeLabel =
+          order.type === "pickup"
+            ? `Orario di ritiro: ${order.pickupTime}`
+            : "Consumo al ristorante";
         const parameters = [
           order.customer.name,
           id,
@@ -281,7 +296,7 @@ export async function POST(request: Request) {
             `${item.quantity} x ${item.name} (${formatPrice(item.price * item.quantity)})${item.accessories?.length ? ` [${item.accessories.map(({ name }) => name).join(", ")}]` : ""}${item.notes ? ` - ${item.notes}` : ""}`,
           ).join("; "),
           formatPrice(total),
-          type,
+          orderTypeLabel,
           order.customer.address || "Non previsto",
           "Ricevuto, in attesa di conferma",
         ].map((text) => text.replace(/\s+/g, " ").trim());

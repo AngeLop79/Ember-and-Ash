@@ -25,8 +25,13 @@ export function buildWhatsAppOrderMessage(
   items: CartItem[],
   total: number,
   type: "pickup" | "dine-in",
-  customerName?: string,
+  customerName: string | undefined,
+  pickupTime: string | null,
 ): string {
+  if (type === "pickup" && !pickupTime) {
+    throw new Error("È necessario selezionare un orario di ritiro.");
+  }
+
   const itemLines = items
     .map(
       (item) =>
@@ -37,7 +42,9 @@ export function buildWhatsAppOrderMessage(
     .join("\n");
 
   const orderType =
-    type === "pickup" ? "*Ritiro in sede*" : "*Consumo al ristorante*";
+    type === "pickup"
+      ? `*Orario di ritiro: ${pickupTime}*`
+      : "*Consumo al ristorante*";
 
   return encodeURIComponent(
     `Salve I ragazzi del sole!\n\nVorrei effettuare un ordine:\n\n${itemLines}\n\n*Totale: ${formatPrice(

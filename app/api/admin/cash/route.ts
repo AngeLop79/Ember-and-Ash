@@ -15,7 +15,8 @@ export async function GET(request: Request) {
   try {
     const result = await getDb().query(
       `SELECT id, public_code AS "publicCode", customer_name AS customer,
-       order_type AS type, total, status, payment_status AS "paymentStatus",
+       order_type AS type, pickup_time AS "pickupTime",
+       total, status, payment_status AS "paymentStatus",
        created_at AS "createdAt"
        FROM orders
        WHERE ($1 = '' OR public_code ILIKE $2 OR customer_name ILIKE $2 OR id = upper($1))

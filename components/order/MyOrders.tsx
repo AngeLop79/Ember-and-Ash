@@ -17,6 +17,7 @@ type PersonalOrder = {
   total: number;
   subtotal: number;
   type: "delivery" | "pickup" | "dine-in";
+  pickupTime: string | null;
   createdAt: string;
   paymentMethod: string;
   whatsappStatus: NotificationStatus | null;
@@ -29,7 +30,7 @@ type PersonalOrder = {
   }[];
 };
 
-const TYPES = { delivery: "Ordine precedente", pickup: "Ritiro in sede", "dine-in": "Consumo al ristorante" };
+const TYPES = { delivery: "Ordine precedente", pickup: "Ritiro", "dine-in": "Consumo al ristorante" };
 const PAYMENTS: Record<string, string> = { card: "Carta (simulata)", cash: "Contanti", transfer: "Bonifico (simulato)" };
 
 export default function MyOrders() {
@@ -110,6 +111,11 @@ export default function MyOrders() {
             <p style={{ color: "#8A7566", fontSize: "13px", marginBottom: "12px" }}>
               {new Date(order.createdAt).toLocaleString("it-IT")} · {TYPES[order.type]}
             </p>
+            {order.pickupTime && (
+              <p style={{ color: "#D4A843", fontSize: "13px", marginBottom: "12px" }}>
+                Ritiro previsto: {order.pickupTime}
+              </p>
+            )}
             <ul style={{ paddingLeft: "18px", marginBottom: "16px" }}>
               {order.items.map((item, index) => (
                 <li key={index}>

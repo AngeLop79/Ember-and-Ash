@@ -3,11 +3,14 @@
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { formatPrice, buildWhatsAppOrderMessage, getWhatsAppUrl } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { isPickupTime, PICKUP_TIMES } from "@/lib/pickupTimes";
 
 export default function Cart() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, itemCount } = useCartStore();
+  const [pickupTime, setPickupTime] = useState("");
   const sub = subtotal();
   const total = sub;
   const count = itemCount();
@@ -19,7 +22,11 @@ export default function Cart() {
   }, [isOpen]);
 
   const handleWhatsAppOrder = () => {
-    const msg = buildWhatsAppOrderMessage(items, total, "pickup");
+    if (!isPickupTime(pickupTime)) {
+      toast.error("Seleziona un orario di ritiro.");
+      return;
+    }
+    const msg = buildWhatsAppOrderMessage(items, total, "pickup", undefined, pickupTime);
     window.open(getWhatsAppUrl(msg), "_blank");
   };
 
@@ -153,6 +160,24 @@ export default function Cart() {
         {/* Footer */}
         {items.length > 0 && (
           <div style={{ padding: "20px 24px", borderTop: "1px solid #3D3028" }}>
+            <label htmlFor="cart-pickup-time" style={{ display: "block", color: "#F5EDD8", fontSize: "13px", fontWeight: 600, marginBottom: "8px" }}>
+              Orario di ritiro *
+            </label>
+            <select
+              id="cart-pickup-time"
+              className="input-field"
+              value={pickupTime}
+              onChange={(event) => setPickupTime(event.target.value)}
+              required
+              style={{ marginBottom: "16px" }}
+            >
+              <option value="">Seleziona un orario</option>
+              {PICKUP_TIMES.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
             <div style={{ marginBottom: "16px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                 <span style={{ fontSize: "13px", color: "#8A7566" }}>Subtotale</span>

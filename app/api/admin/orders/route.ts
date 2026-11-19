@@ -25,7 +25,8 @@ export async function GET(request: Request) {
               ELSE '' END,
           ', ' ORDER BY oi.id
         ) FROM order_items oi WHERE oi.order_id = o.id) AS items,
-        o.total, o.order_type AS type, o.status, o.created_at AS time,
+        o.total, o.order_type AS type, o.pickup_time AS "pickupTime",
+        o.status, o.created_at AS time,
         o.customer_phone AS phone, n.status AS "whatsappStatus"
        FROM orders o
        LEFT JOIN order_notifications n ON n.order_id = o.id

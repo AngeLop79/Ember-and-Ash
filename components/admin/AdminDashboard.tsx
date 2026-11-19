@@ -43,6 +43,7 @@ type AdminOrder = {
   items: string;
   total: number;
   type: string;
+  pickupTime: string | null;
   status: OrderStatus;
   time: string;
   phone: string;
@@ -887,6 +888,11 @@ export default function AdminDashboard() {
                         <p style={{ fontSize: "13px", color: "#8A7566" }}>
                           {order.items}
                         </p>
+                        {order.pickupTime && (
+                          <p style={{ fontSize: "13px", color: "#D4A843", marginTop: "4px" }}>
+                            Ritiro previsto: {order.pickupTime}
+                          </p>
+                        )}
                         <p
                           style={{
                             fontSize: "12px",

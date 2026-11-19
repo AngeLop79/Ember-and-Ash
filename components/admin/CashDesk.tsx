@@ -12,6 +12,7 @@ type CashOrder = {
   publicCode: string;
   customer: string;
   type: keyof typeof ORDER_TYPES;
+  pickupTime: string | null;
   total: number;
   status: OrderStatus;
   paymentStatus: string;
@@ -82,6 +83,7 @@ export default function CashDesk() {
               <strong style={{ fontSize: "32px", color: "#D4A843" }}>{order.publicCode}</strong>
               <p>{order.customer}</p>
               <p style={{ color: "#8A7566", fontSize: "13px" }}>{ORDER_TYPES[order.type]} · {new Date(order.createdAt).toLocaleString("it-IT")}</p>
+              {order.pickupTime && <p style={{ color: "#D4A843", fontSize: "13px" }}>Ritiro previsto: {order.pickupTime}</p>}
             </div>
             <div>
               <strong style={{ fontSize: "28px" }}>{formatPrice(order.total)}</strong>

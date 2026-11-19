@@ -28,7 +28,8 @@ export async function GET(request: Request) {
     const result = await getDb().query(
       `SELECT o.id, o.public_code AS "publicCode", o.payment_status AS "paymentStatus",
         o.status, o.total, o.subtotal, o.delivery_fee AS "deliveryFee",
-        o.order_type AS type, o.created_at AS "createdAt", o.created_at::text AS "cursorTime", o.customer_address AS address,
+        o.order_type AS type, o.pickup_time AS "pickupTime",
+        o.created_at AS "createdAt", o.created_at::text AS "cursorTime", o.customer_address AS address,
         o.payment_method AS "paymentMethod", n.status AS "whatsappStatus",
         COALESCE(json_agg(json_build_object(
           'name', i.name, 'quantity', i.quantity, 'unitPrice', i.unit_price, 'notes', i.notes,

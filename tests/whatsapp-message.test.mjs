@@ -24,7 +24,13 @@ test("WhatsApp order text preserves separate customizations and totals without e
     { name: "Panino", price: 500, quantity: 1, accessories: [{ name: "Ketchup" }] },
   ];
   for (const type of ["pickup", "dine-in"]) {
-    const encoded = exports.buildWhatsAppOrderMessage(items, 1000, type, "Mario");
+    const encoded = exports.buildWhatsAppOrderMessage(
+      items,
+      1000,
+      type,
+      "Mario",
+      type === "pickup" ? "19:30" : null,
+    );
     const text = decodeURIComponent(encoded);
     assert.doesNotMatch(text, /\p{Extended_Pictographic}|\uFFFD|\uFE0F/u);
     assert.equal(text.match(/- Panino x1/g).length, 2);
@@ -32,10 +38,17 @@ test("WhatsApp order text preserves separate customizations and totals without e
     assert.match(text, /Personalizzazioni gratuite: Ketchup/);
     assert.ok(text.includes("*Totale: 10,00\u00a0€*"));
     assert.match(text, /Nome: Mario/);
-    assert.ok(text.includes(type === "pickup" ? "*Ritiro in sede*" : "*Consumo al ristorante*"));
+    assert.ok(text.includes(type === "pickup" ? "*Orario di ritiro: 19:30*" : "*Consumo al ristorante*"));
     const url = new URL(exports.getWhatsAppUrl(encoded));
     assert.equal(url.searchParams.get("text"), text);
   }
+});
+
+test("WhatsApp pickup orders include the selected pickup time", () => {
+  const text = decodeURIComponent(
+    exports.buildWhatsAppOrderMessage([], 0, "pickup", undefined, "19:30"),
+  );
+  assert.match(text, /\*Orario di ritiro: 19:30\*/);
 });
 
 test("WhatsApp reservation text retains details without emoji", () => {

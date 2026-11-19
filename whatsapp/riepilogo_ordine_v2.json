@@ -13,7 +13,7 @@
           { "param_name": "order_code", "example": "A-042" },
           { "param_name": "items", "example": "2 x Piatto del giorno (20,00 EUR)" },
           { "param_name": "total", "example": "20,00 EUR" },
-          { "param_name": "order_type", "example": "Ritiro in sede" },
+          { "param_name": "order_type", "example": "Orario di ritiro: 19:30" },
           { "param_name": "address", "example": "Non previsto" },
           { "param_name": "status", "example": "In attesa di conferma; da pagare in cassa" }
         ]

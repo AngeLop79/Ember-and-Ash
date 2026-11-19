@@ -33,7 +33,9 @@ export function orderTemplateParameters(order: OrderDetails): string[] {
       `${item.quantity} x ${item.name} (${formatPrice(item.quantity * item.unitPrice)})${item.accessories?.length ? ` [${item.accessories.map(({ name }) => name).join(", ")}]` : ""}${item.notes ? ` - ${item.notes}` : ""}`,
     ).join("; "),
     formatPrice(order.total),
-    ORDER_TYPES[order.type],
+    order.type === "pickup" && order.pickupTime
+      ? `Orario di ritiro: ${order.pickupTime}`
+      : ORDER_TYPES[order.type],
     "Non previsto",
     `${orderStatusLabel(order.status, order.type)}; ${order.paymentStatus === "paid" ? "pagato" : order.status === "cancelled" ? "annullato" : "da pagare in cassa"}`,
   ].map((text) => text.replace(/\s+/g, " ").trim());

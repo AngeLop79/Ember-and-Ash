@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_email TEXT,
   customer_address TEXT,
   order_type TEXT NOT NULL CHECK (order_type IN ('delivery', 'pickup', 'dine-in')),
+  pickup_time TEXT,
   subtotal INTEGER NOT NULL CHECK (subtotal >= 0),
   delivery_fee INTEGER NOT NULL CHECK (delivery_fee >= 0),
   total INTEGER NOT NULL CHECK (total >= 0),

@@ -2,7 +2,7 @@ import type { OrderStatus } from "@/types";
 
 export const ORDER_TYPES = {
   delivery: "Ordine precedente",
-  pickup: "Ritiro in sede",
+  pickup: "Ritiro",
   "dine-in": "Consumo al ristorante",
 };
 

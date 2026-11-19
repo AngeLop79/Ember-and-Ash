@@ -12,6 +12,7 @@ export default function OrderDetails({ order, staff = false }: { order: Order; s
       <p style={{ fontSize: "20px", marginBottom: "12px" }}>{order.customer}</p>
       <p style={{ color: "#D4A843", marginBottom: "12px" }}>{orderStatusLabel(order.status, order.type)}</p>
       <p style={{ marginBottom: "16px" }}>{ORDER_TYPES[order.type]} · {order.createdAt.toLocaleString("it-IT", { timeZone: "Europe/Rome" })}</p>
+      {order.pickupTime && <p style={{ color: "#D4A843", fontWeight: 700, marginBottom: "16px" }}>Orario di ritiro: {order.pickupTime}</p>}
       <div style={{ display: "grid", gap: "12px", marginBottom: "24px" }}>
         {order.items.map((item, index) => (
           <div key={index} style={{ borderBottom: "1px solid #3D3028", paddingBottom: "10px" }}>

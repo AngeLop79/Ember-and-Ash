@@ -13,6 +13,7 @@ try {
   await client.query(await readFile(new URL("../database/migrations/20261022_cash_desk.sql", import.meta.url), "utf8"));
   await client.query(await readFile(new URL("../database/migrations/20261027_google_auth.sql", import.meta.url), "utf8"));
   await client.query(await readFile(new URL("../database/migrations/20261030_order_accessories.sql", import.meta.url), "utf8"));
+  await client.query(await readFile(new URL("../database/migrations/20261120_pickup_time.sql", import.meta.url), "utf8"));
   await client.query("COMMIT");
   console.log("Database ready: accounts, Google login, order accessories, order numbers, cash desk and WhatsApp notifications.");
 } catch (error) {

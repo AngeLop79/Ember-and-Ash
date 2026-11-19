@@ -26,7 +26,7 @@ export async function GET(
       return Response.json({ error: "Completa il profilo per consultare l'ordine." }, { status: 403 });
     }
     result = await getDb().query(
-      `SELECT o.id, o.order_type, o.status,
+      `SELECT o.id, o.order_type, o.pickup_time, o.status,
         COALESCE(
           string_agg(
             oi.name || ' × ' || oi.quantity ||
@@ -53,7 +53,7 @@ export async function GET(
   }
 
   const order = result.rows[0] as
-    | { id: string; order_type: string; status: string; items: string }
+    | { id: string; order_type: string; pickup_time: string | null; status: string; items: string }
     | undefined;
   if (!order) {
     return Response.json({ error: "Ordine non trovato." }, { status: 404 });
@@ -65,6 +65,7 @@ export async function GET(
     statusStep: STATUS_STEPS[order.status] ?? 0,
     items: order.items,
     type: order.order_type,
+    pickupTime: order.pickup_time,
     message: "Cu avi fami, si metta 'ntra fila!",
   }, { headers: { "Cache-Control": "no-store" } });
 }
